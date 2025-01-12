@@ -1,4 +1,6 @@
 -- 文件高亮、缩进工具，需要安装node
+--
+-- WARN: indent不等于formatter，只能简单缩进对齐，无法识别语法
 -- indent快捷键'=', 一般常用的indent方法 'gg=G' (跳转到第一行，然后indent到最后一行)
 return {
   {
