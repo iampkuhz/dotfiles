@@ -2,6 +2,7 @@ return {
   {
     "stevearc/conform.nvim",
     event = { "BufWritePre" },
+    -- 快捷键 `:ConformInfo` 查看插件安装现状
     cmd = { "ConformInfo" },
     keys = {
       {
@@ -27,6 +28,7 @@ return {
         javascript = { "prettierd", "prettier", stop_after_first = true }, -- JavaScript 文件使用 `prettierd`，如果失败则使用 `prettier`，并在第一个成功后停止。
         bash = { "shfmt" },
         sh = { "shfmt" },
+        rust = { "rustfmt", lsp_format = "fallback" },
       },
       -- 设置默认的格式化选项。
       default_format_opts = {

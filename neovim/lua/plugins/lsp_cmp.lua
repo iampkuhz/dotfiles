@@ -35,18 +35,18 @@ return {
       cmp.setup({
         snippet = {
           expand = function(args)
-            luasnip.lsp_expand(args.body)  -- 让 nvim-cmp 调用 LuaSnip 来处理 snippet
+            luasnip.lsp_expand(args.body) -- 让 nvim-cmp 调用 LuaSnip 来处理 snippet
           end,
         },
         mapping = {
-          ["<CR>"] = cmp.mapping.confirm({ select = true }),  -- 回车确认
-          ["<Tab>"] = cmp.mapping.select_next_item(),         -- Tab 切换
+          ["<CR>"] = cmp.mapping.confirm({ select = true }), -- 回车确认
+          ["<Tab>"] = cmp.mapping.select_next_item(), -- Tab 切换
           ["<S-Tab>"] = cmp.mapping.select_prev_item(),
         },
         sources = cmp.config.sources({
           { name = "nvim_lsp" },
           { name = "luasnip" },
-        },{
+        }, {
           { name = "buffer" },
           { name = "path" },
         }),
@@ -90,7 +90,7 @@ return {
       --     -- ...
       --   end,
       -- })
-    end
+    end,
   },
 
   -- 3. 可选：williamboman/mason.nvim + mason-lspconfig.nvim
@@ -105,13 +105,26 @@ return {
       require("mason-lspconfig").setup({
         ensure_installed = {
           "lua_ls",
+
+          -- rust support
+          "rust_analyzer",
+
+          -- markdown
+          "grammarly",
+
+          -- java
+          "ast_grep",
+
+          -- solidity
+          "solc",
+
           -- "tsserver",
           -- "pyright",
           -- "bashls",
           -- ...
+          --
         },
       })
-    end
+    end,
   },
 }
-
