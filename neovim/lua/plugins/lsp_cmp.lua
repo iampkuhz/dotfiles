@@ -21,6 +21,10 @@ return {
       "onsails/lspkind-nvim",
       -- 可选，提供丰富的预置 snippet
       "rafamadriz/friendly-snippets",
+      -- 命令行补全
+      "hrsh7th/cmp-cmdline",
+      -- lsp补全
+      "hrsh7th/cmp-nvim-lsp",
     },
     config = function()
       -- 引入 nvim-cmp
@@ -59,6 +63,27 @@ return {
           }),
         },
       })
+
+      -- 为 `/` 搜索模式配置补全
+      cmp.setup.cmdline("/", {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = {
+          { name = "buffer" },
+        },
+      })
+
+      -- 为 `:` 命令行模式配置补全
+      cmp.setup.cmdline(":", {
+        mapping = cmp.mapping.preset.cmdline(),
+        sources = cmp.config.sources({
+          { name = "path" },
+        }, {
+          { name = "cmdline" },
+        }),
+      })
+
+      -- 添加命令行模式的 Tab 键补全映射
+      vim.api.nvim_set_keymap("c", "<Tab>", "v:lua.cmp#complete()", { noremap = true, expr = true })
     end,
   },
 

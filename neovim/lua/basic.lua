@@ -1,11 +1,12 @@
 -- utf8
 vim.g.encoding = "UTF-8"
-vim.o.fileencoding = 'utf-8'
+vim.o.fileencoding = "utf-8"
 -- jk移动时光标下上方保留4行
 vim.o.scrolloff = 4
 vim.o.sidescrolloff = 4
 -- 使用相对行号
 vim.wo.number = true
+-- 当前文件使用相对行号,vscode中不生效,需要使用vscode原生配置项中的相对行号配置
 vim.wo.relativenumber = true
 -- 高亮所在行
 vim.wo.cursorline = true
@@ -45,7 +46,7 @@ vim.bo.autoread = true
 vim.o.wrap = false
 vim.wo.wrap = false
 -- 行结尾可以跳到下一行
-vim.o.whichwrap = 'b,s,<,>,[,],h,l'
+vim.o.whichwrap = "b,s,<,>,[,],h,l"
 -- 允许隐藏被修改过的buffer
 vim.o.hidden = true
 -- 关闭鼠标支持，有的时候通过鼠标点击回到vim会换光标位置，感觉不好用
@@ -73,8 +74,11 @@ vim.o.list = true
 vim.o.listchars = "space:·"
 -- 补全增强
 vim.o.wildmenu = true
+-- longest:full：第一次按 Tab，补全到最长公共前缀。
+-- "full"：再次按 Tab，显示所有匹配选项。
+vim.opt.wildmode = { "longest:full", "full" }
 -- Dont' pass messages to |ins-completin menu|
-vim.o.shortmess = vim.o.shortmess .. 'c'
+vim.o.shortmess = vim.o.shortmess .. "c"
 vim.o.pumheight = 10
 -- always show tabline, 包括开头第一行显示文件路径
 vim.o.showtabline = 2
