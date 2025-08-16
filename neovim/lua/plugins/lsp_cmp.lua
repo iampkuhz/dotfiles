@@ -1,5 +1,5 @@
 -- 文件: lua/plugins/lsp_cmp.lua
--- 代码自动补全
+-- 代码自动补全配置
 -- sdt启用代码自动补全功能，结合nvim-cmp插件配置
 return {
   {
@@ -10,9 +10,11 @@ return {
     config = function()
       -- 读取环境变量
       local provider = (vim.env.AI_PROVIDER or ""):lower()
+      local provider_name = ""
       -- 根据 provider 组装 providers 表
       local providers = {}
       if provider == "openai" then
+        provider_name = "openai"
         -- 严格检查 key，避免“按了 <A-y> 没反应”
         local key = vim.env.OPENAI_API_KEY
         if key and key ~= "" then
@@ -31,9 +33,11 @@ return {
           vim.notify("[minuet] OPENAI_API_KEY 未设置，已跳过 openai provider", vim.log.levels.WARN)
         end
       elseif provider == "ollama" then
+        provider_name = "openai_fim_compatible"
         providers.openai_fim_compatible = {
-          end_point = vim.env.OLLAMA_ENDPOINT or "http://127.0.0.1:11434",
-          model = vim.env.OLLAMA_MODEL or "qwen2.5-coder:7b",
+          api_key = "TERM",
+          end_point = vim.env.OLLAMA_ENDPOINT or "http://127.0.0.1:11434/v1/completions",
+          model = vim.env.OLLAMA_MODEL or "qwen2.5-coder:0.5b",
           -- options = { temperature = 0.1 },
         }
       else
@@ -46,9 +50,9 @@ return {
 
       -- 最小化配置：保持默认，先跑通链路
       require("minuet").setup({
-        provider = provider,
+        provider = provider_name,
         request_timeout = 8,
-        -- notify = "debug",
+        notify = "debug",
         n_completions = 1,
         context_window = 500,
         provider_options = providers,
@@ -101,7 +105,13 @@ return {
         },
         sources = cmp.config.sources({
           { name = "minuet" },
-          { name = "nvim_lsp" },
+          {
+            name = "nvim_lsp",
+            entry_filter = function(entry, _)
+              local K = require("cmp.types").lsp.CompletionItemKind
+              return entry:get_kind() ~= K.Snippet
+            end,
+          },
           { name = "luasnip" },
         }, {
           { name = "buffer", keyword_length = 2, max_item_count = 5 },
@@ -121,6 +131,7 @@ return {
               local menu =
                 { minuet = "[AI]", nvim_lsp = "[LSP]", luasnip = "[SNIP]", buffer = "[BUF]", path = "[PATH]" }
               vim_item.menu = menu[entry.source.name] or ""
+              vim_item.dup = ({ nvim_lsp = 0, buffer = 1, path = 1, luasnip = 1 })[entry.source.name] or 0
               return vim_item
             end,
           }),
@@ -181,7 +192,6 @@ return {
       require("mason").setup()
       require("mason-lspconfig").setup({
         ensure_installed = {
-          "lua_ls",
           "rust_analyzer",--[[ markdown ]]
           "grammarly", --[[ java ]]
           "ast_grep",

@@ -16,12 +16,21 @@ ENABLE_CORRECTION="true"
 HIST_STAMPS="yyyy-mm-dd"
 
 plugins=(
-git
-zsh-autosuggestions
-zsh-syntax-highlighting
-fast-syntax-highlighting
-zsh-autocomplete
+  git
+  # 当前行的代码补全提示，按 → 补全
+  zsh-autosuggestions
+
+  #zsh-syntax-highlighting
+  # 和zsh-syntax-highlighting 二选一，fast高亮更多
+  fast-syntax-highlighting
+
+  zsh-autocomplete
+
+  kubectl
+  # https://github.com/Katrovsky/zsh-ollama-completion
+  ollama
 )
+
 
 source $ZSH/oh-my-zsh.sh
 
@@ -67,6 +76,10 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 export PATH="$HOME/.cargo/bin:$PATH"
 
-export AI_PROVIDER="openai"
+export AI_PROVIDER="ollama"
+# export AI_PROVIDER="openai"
 export OPENAI_API_KEY="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"
-
+export OPENAI_MODEL=gpt-5-nano
+export OPENAI_BASE_URL=https://api.openai.com/v1
+export OLLAMA_ENDPOINT="http://127.0.0.1:11434/v1/completions"
+export OLLAMA_MODEL="qwen2.5-coder-feipi:0.5b_boost1"
