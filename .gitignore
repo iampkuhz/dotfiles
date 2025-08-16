@@ -5,3 +5,5 @@ lazy-lock.json
 
 *.lock.*
 *-lock.*
+
+.DS_Store
