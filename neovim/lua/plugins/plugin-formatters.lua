@@ -28,7 +28,10 @@ return {
         javascript = { "prettierd", "prettier", stop_after_first = true }, -- JavaScript 文件使用 `prettierd`，如果失败则使用 `prettier`，并在第一个成功后停止。
         bash = { "shfmt" },
         sh = { "shfmt" },
+        yaml = { "yamlfmt" },
         rust = { "rustfmt", lsp_format = "fallback" },
+        -- 没有配置的都是用 prettierd
+        ["*"] = { "prettierd" },
       },
       -- 设置默认的格式化选项。
       default_format_opts = {

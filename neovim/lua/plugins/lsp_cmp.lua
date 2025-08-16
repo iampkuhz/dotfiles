@@ -1,5 +1,5 @@
 -- 文件: lua/plugins/lsp_cmp.lua
--- 代码自动补全配置
+-- 代码自动补全配置,
 -- sdt启用代码自动补全功能，结合nvim-cmp插件配置
 return {
   {
@@ -38,7 +38,10 @@ return {
           api_key = "TERM",
           end_point = vim.env.OLLAMA_ENDPOINT or "http://127.0.0.1:11434/v1/completions",
           model = vim.env.OLLAMA_MODEL or "qwen2.5-coder:0.5b",
-          -- options = { temperature = 0.1 },
+          options = {
+            max_token = 96,
+            top_p = 0.9,
+          },
         }
       else
         -- 未设置或不认识的 provider：允许空配置启动（<A-y> 会提示未配置）
