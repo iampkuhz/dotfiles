@@ -1,68 +1,6 @@
 -- 文件: lua/plugins/lsp_cmp.lua
 -- 代码自动补全配置
 return {
-  {
-    "milanglacier/minuet-ai.nvim",
-    -- 许多插件会用到 plenary；如果你环境里已有可省略
-    dependencies = { "nvim-lua/plenary.nvim" },
-    -- 懒加载策略：只要你愿意，也可以加 event/keys，不过你已在 cmp 那边引用到它了
-    config = function()
-      -- 读取环境变量
-      local provider = (vim.env.AI_PROVIDER or ""):lower()
-      local provider_name = ""
-      -- 根据 provider 组装 providers 表
-      local providers = {}
-      if provider == "openai" then
-        provider_name = "openai"
-        -- 严格检查 key，避免“按了 <A-y> 没反应”
-        local key = vim.env.OPENAI_API_KEY
-        if key and key ~= "" then
-          providers.openai_fim_compatible = {
-            api_key = "OPENAI_API_KEY",
-            model = vim.env.OPENAI_MODEL or "gpt-5-nano",
-            stream = true, -- 需要流式就 true；多数补全场景 false 即可
-            optional = {
-              -- 生成控制
-              max_completion_tokens = 256, -- 最多生成多少 tokens（直接决定花费，越小越省钱）
-              n = 1, -- 一次要几条候选（>1 会翻倍花钱；建议 1）
-              user = "nvim", -- 传给 OpenAI 的 user 字段（审计/限流维度）
-            },
-          }
-        else
-          vim.notify("[minuet] OPENAI_API_KEY 未设置，已跳过 openai provider", vim.log.levels.WARN)
-        end
-      elseif provider == "ollama" then
-        provider_name = "openai_fim_compatible"
-        providers.openai_fim_compatible = {
-          api_key = "TERM",
-          end_point = vim.env.OLLAMA_ENDPOINT or "http://127.0.0.1:11434/v1/completions",
-          model = vim.env.OLLAMA_MODEL or "qwen2.5-coder:0.5b",
-          options = {
-            max_token = 96,
-            top_p = 0.9,
-          },
-        }
-      else
-        -- 未设置或不认识的 provider：允许空配置启动（<A-y> 会提示未配置）
-        vim.notify(
-          "[minuet] 未设置或不支持的 AI_PROVIDER，minuet 将以默认/禁用状态运行",
-          vim.log.levels.INFO
-        )
-      end
-
-      -- 最小化配置：保持默认，先跑通链路
-      require("minuet").setup({
-        provider = provider_name,
-        request_timeout = 8,
-        notify = "debug",
-        n_completions = 1,
-        context_window = 500,
-        provider_options = providers,
-        auto_trigger_ft = { "*" },
-      })
-    end,
-  },
-
   -- 1. 自动补全框架 nvim-cmp 本体
   {
     "hrsh7th/nvim-cmp",
@@ -113,13 +51,11 @@ return {
           end,
         },
         mapping = {
-          ["<C-;>"] = require("minuet").make_cmp_map(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }), -- 回车确认
           ["<Tab>"] = cmp.mapping.select_next_item(), -- Tab 切换
           ["<S-Tab>"] = cmp.mapping.select_prev_item(),
         },
         sources = cmp.config.sources({
-          { name = "minuet" },
           -- 让 LSP 靠前（= 优先保留 LSP，过滤掉后面的重复）
           {
             name = "nvim_lsp",
@@ -159,8 +95,7 @@ return {
             maxwidth = 100,
             ellipsis_char = "...",
             before = function(entry, vim_item)
-              local menu =
-                { minuet = "[AI]", nvim_lsp = "[LSP]", luasnip = "[SNIP]", buffer = "[BUF]", path = "[PATH]" }
+              local menu = { nvim_lsp = "[LSP]", luasnip = "[SNIP]", buffer = "[BUF]", path = "[PATH]" }
               vim_item.menu = menu[entry.source.name] or ("[" .. entry.source.name .. "]")
               -- vim_item.dup = ({ nvim_lsp = 0, buffer = 1, path = 1, luasnip = 1 })[entry.source.name] or 0
               return vim_item

@@ -2,6 +2,11 @@ export ZSH="$HOME/.oh-my-zsh"
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 
+# 本机请求不走代理
+export NO_PROXY=127.0.0.1,localhost
+export no_proxy=$NO_PROXY
+
+
 ZSH_THEME="spaceship"
 
 # zsh 更新频率，13天一次
@@ -82,4 +87,6 @@ export OPENAI_API_KEY="sk-proj-tQGAGhnqp81DM5ntweHo1eck3jaI4y7856IxhB3_V9RMuQmyt
 export OPENAI_MODEL=gpt-5-nano
 export OPENAI_BASE_URL=https://api.openai.com/v1
 export OLLAMA_ENDPOINT="http://127.0.0.1:11434/v1/completions"
-export OLLAMA_MODEL="qwen2.5-coder-feipi:0.5b_boost1"
+export OLLAMA_COMPLETION_MODEL="qwen2.5-coder-feipi:0.5b_boost2"
+
+export GITHUB_TOKEN='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'
