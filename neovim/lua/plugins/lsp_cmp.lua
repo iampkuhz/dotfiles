@@ -1,6 +1,5 @@
 -- 文件: lua/plugins/lsp_cmp.lua
--- 代码自动补全配置,
--- sdt启用代码自动补全功能，结合nvim-cmp插件配置
+-- 代码自动补全配置
 return {
   {
     "milanglacier/minuet-ai.nvim",
@@ -59,6 +58,7 @@ return {
         n_completions = 1,
         context_window = 500,
         provider_options = providers,
+        auto_trigger_ft = { "*" },
       })
     end,
   },
@@ -92,6 +92,18 @@ return {
       local lspkind = require("lspkind")
       -- 可选：加载 friendly-snippets
       require("luasnip.loaders.from_vscode").lazy_load()
+      -- 记录本次 completion 菜单里已经出现过的 label, 用来去重
+      -- 如果同一个候选值某个来源提示了，另一个来源不重复提示
+      local seen_labels = {}
+      cmp.event:on("menu_opened", function()
+        seen_labels = {}
+      end)
+      cmp.event:on("menu_closed", function()
+        seen_labels = {}
+      end)
+      cmp.event:on("complete_done", function()
+        seen_labels = {}
+      end)
 
       -- 基本配置
       cmp.setup({
@@ -108,16 +120,32 @@ return {
         },
         sources = cmp.config.sources({
           { name = "minuet" },
+          -- 让 LSP 靠前（= 优先保留 LSP，过滤掉后面的重复）
           {
             name = "nvim_lsp",
             entry_filter = function(entry, _)
-              local K = require("cmp.types").lsp.CompletionItemKind
-              return entry:get_kind() ~= K.Snippet
+              local label = entry.completion_item and entry.completion_item.label or ""
+              if label ~= "" and not seen_labels[label] then
+                seen_labels[label] = "nvim_lsp"
+              end
+              return true -- LSP 一律保留
             end,
           },
           { name = "luasnip" },
-        }, {
-          { name = "buffer", keyword_length = 2, max_item_count = 5 },
+          -- Buffer 放在后面：如果 label 已经被上面的 source 放过，就丢弃
+          {
+            name = "buffer",
+            keyword_length = 2,
+            max_item_count = 5,
+            entry_filter = function(entry, _)
+              local label = entry.completion_item and entry.completion_item.label or ""
+              if label ~= "" and seen_labels[label] then
+                return false -- 丢掉与 LSP/前序 source 重复的
+              end
+              seen_labels[label] = "buffer"
+              return true
+            end,
+          },
           { name = "path" },
         }),
         performance = {
@@ -133,8 +161,8 @@ return {
             before = function(entry, vim_item)
               local menu =
                 { minuet = "[AI]", nvim_lsp = "[LSP]", luasnip = "[SNIP]", buffer = "[BUF]", path = "[PATH]" }
-              vim_item.menu = menu[entry.source.name] or ""
-              vim_item.dup = ({ nvim_lsp = 0, buffer = 1, path = 1, luasnip = 1 })[entry.source.name] or 0
+              vim_item.menu = menu[entry.source.name] or ("[" .. entry.source.name .. "]")
+              -- vim_item.dup = ({ nvim_lsp = 0, buffer = 1, path = 1, luasnip = 1 })[entry.source.name] or 0
               return vim_item
             end,
           }),
