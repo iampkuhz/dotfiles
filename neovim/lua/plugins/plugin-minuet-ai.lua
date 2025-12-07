@@ -33,7 +33,10 @@ return {
         name = "ollama",
         end_point = "http://127.0.0.1:11434/v1/completions",
         model = os.getenv("OLLAMA_COMPLETION_MODEL"),
-        api_key = "TERM",
+        -- 关键：用函数返回字面量，避免被当成 env 名字解析
+        api_key = function()
+          return "dummy"
+        end,
         stream = true,
         optional = {
           n = 1,

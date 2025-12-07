@@ -90,3 +90,11 @@ export OLLAMA_ENDPOINT="http://127.0.0.1:11434/v1/completions"
 export OLLAMA_COMPLETION_MODEL="qwen2.5-coder-feipi:0.5b_boost2"
 
 export GITHUB_TOKEN='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'
+
+
+# 使用rbenv 管理 ruby 环境，不要用mac系统的ruby
+eval "$(rbenv init - zsh)"
+
+
+# solana cli
+export PATH="/Users/zhehan/.local/share/solana/install/active_release/bin:$PATH"
