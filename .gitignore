@@ -7,3 +7,5 @@ lazy-lock.json
 *-lock.*
 
 .DS_Store
+
+.idea/
