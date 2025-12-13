@@ -2,6 +2,7 @@
 return {
   "OXY2DEV/markview.nvim",
   lazy = false,
+  enabled = not vim.g.vscode, -- 在 VSCode 中禁用
   opts = {
     enable = false,
   },

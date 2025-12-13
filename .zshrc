@@ -39,13 +39,6 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
-export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-
 alias vim="nvim"
 alias vi="nvim"
 
@@ -77,8 +70,6 @@ export PATH="$PYENV_ROOT/bin:$PATH"
 eval "$(pyenv init --path)"
 eval "$(pyenv init -)"
 
-export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"  # This loads nvm
 export PATH="$HOME/.cargo/bin:$PATH"
 
 export AI_PROVIDER="ollama"
@@ -89,12 +80,31 @@ export OPENAI_BASE_URL=https://api.openai.com/v1
 export OLLAMA_ENDPOINT="http://127.0.0.1:11434/v1/completions"
 export OLLAMA_COMPLETION_MODEL="qwen2.5-coder-feipi:0.5b_boost2"
 
+# 本地启动 ollama start
+# 注入并生效到通过 launchd 启动的服务
+# launchctl setenv OLLAMA_KEEP_ALIVE 30m
+# launchctl setenv OLLAMA_NUM_PARALLEL 1
+# launchctl setenv OLLAMA_MAX_LOADED_MODELS 1
+# brew services restart ollama
+# 本地启动 ollama end
+
 export GITHUB_TOKEN='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'
 
 
 # 使用rbenv 管理 ruby 环境，不要用mac系统的ruby
 eval "$(rbenv init - zsh)"
 
+# perl 环境变量，用来做latex format
+export PATH="/opt/homebrew/opt/perl/bin:$PATH"
+
+# 将homebrew的路径放到前面
+export PATH="/opt/homebrew/bin:/opt/homebrew/sbin:$PATH"
 
 # solana cli
 export PATH="/Users/zhehan/.local/share/solana/install/active_release/bin:$PATH"
+
+# 不要通过homebrew，而是通过直接下载nvm做配置
+# 设置默认使用lts版本： nvm alias default 'lts/*'
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
