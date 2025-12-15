@@ -4,7 +4,7 @@ schema: v1
 
 models:
   # ========= 行内补全（统一走 OpenAI 兼容接口：可指向 OpenAI 云 or 本地 Ollama）=========
-  - name: Autocomplete
+  - name: Autocomplete-${{ secrets.AUTOCOMPLETE_MODEL }}
     provider: openai
     model: ${{ secrets.AUTOCOMPLETE_MODEL }}
     apiBase: ${{ secrets.AUTOCOMPLETE_API_BASE }}
@@ -21,7 +21,7 @@ models:
       onlyMyCode: true
 
   # ========= Chat / Edit / Apply（同样走 OpenAI 兼容接口：默认用 OpenAI 云）=========
-  - name: Chat
+  - name: Chat-${{ secrets.CHAT_MODEL }}
     provider: openai
     model: ${{ secrets.CHAT_MODEL }}
     apiBase: ${{ secrets.CHAT_API_BASE }}
