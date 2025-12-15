@@ -6,17 +6,14 @@
 # 默认供应商（可被 ~/.env 覆盖）
 : ${AI_PROVIDER:=openai}
 
-# OpenAI：默认基地址（一般不用放到 ~/.env）
-: ${OPENAI_API_BASE:=https://api.openai.com/v1}
+# 代码补全配置项
+: ${AUTOCOMPLETE_API_BASE:=https://api.openai.com/v1}
+: ${AUTOCOMPLETE_MODEL:=gpt-5.1-codex-mini}
 
-# Ollama：默认基地址（M4 Pro 本机一般就是这个；M1 若连远端再在 ~/.env 覆盖）
-: ${OLLAMA_API_BASE:=http://127.0.0.1:11434}
-
-# 默认模型（你说先用 codex-mini，就给个默认；也可在 ~/.env 覆盖）
-: ${OPENAI_MODEL:=gpt-5.1-codex-mini}
-
-# Ollama 行内补全模型默认值（可在 ~/.env 覆盖）
-: ${OLLAMA_AUTOCOMPLETE_MODEL:=qwen2.5-coder-feipi:0.5b_boost2}
+# 聊天配置项
+: ${CHAT_API_BASE:=https://generativelanguage.googleapis.com/v1beta/openai/}
+: ${CHAT_API_KEY:=}
+: ${CHAT_MODEL:=gemini-3-pro-preview}
 
 # 兼容你旧变量：如果你仍然用 OLLAMA_ENDPOINT，则优先不动；
 # 如果没给 OLLAMA_ENDPOINT，就从 OLLAMA_API_BASE 推导一个（保留你旧的 /v1/completions 形式）
