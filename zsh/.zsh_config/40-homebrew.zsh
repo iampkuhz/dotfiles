@@ -1,5 +1,7 @@
 # Homebrew 自动更新频率（秒）：7 天
-export HOMEBREW_AUTO_UPDATE_SECS="604800"
+export HOMEBREW_AUTO_UPDATE_SECS=604800
+# API 元数据更新也改成7天
+export HOMEBREW_API_AUTO_UPDATE_SECS=604800
 
 # Homebrew 国内源（中科大）
 export HOMEBREW_API_DOMAIN="https://mirrors.ustc.edu.cn/homebrew-bottles/api"

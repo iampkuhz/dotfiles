@@ -1,4 +1,4 @@
-brew install yarn yamlfmt
+brew install yarn yamlfmt pdf2svg
 
 # 代码formatter工具，neovim的formatter插件（conform.nvim等）会调用
 brew install shfmt stylua prettier fsouza/prettierd/prettierd
