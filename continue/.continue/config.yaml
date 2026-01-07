@@ -36,6 +36,23 @@ models:
       temperature: 0.2
       maxTokens: 1500
 
+  # ========= Code（专用于代码生成/重构/复杂改动；走 Qwen OpenAI 兼容）=========
+  - name: Code-${{ secrets.CODE_MODEL }}
+    provider: openai
+    model: ${{ secrets.CODE_MODEL }}
+    apiBase: ${{ secrets.CODE_API_BASE }}
+    apiKey: ${{ secrets.CODE_API_KEY }}
+    roles:
+      - chat
+      - edit
+      - apply
+    requestOptions:
+      timeout: 90000
+    defaultCompletionOptions:
+      temperature: 0.1
+      maxTokens: 3000
+
+
 context:
   - provider: code
   - provider: docs
