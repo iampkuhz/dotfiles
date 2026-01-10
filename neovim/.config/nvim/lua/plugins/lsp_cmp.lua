@@ -144,6 +144,16 @@ return {
           },
         },
       })
+
+      -- Grammarly 在 Node v24 下偶发解析本地 wasm 路径报错，
+      -- 这里通过环境变量关闭 fetch（避免用 undici 处理 file path）。
+      lspconfig.grammarly.setup({
+        capabilities = capabilities,
+        cmd_env = {
+          -- 仅影响 grammarly 进程，不影响全局 Node
+          NODE_OPTIONS = "--no-experimental-fetch",
+        },
+      })
     end,
   },
 

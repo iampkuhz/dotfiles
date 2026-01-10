@@ -36,4 +36,4 @@ export ANTHROPIC_BASE_URL="https://dashscope.aliyuncs.com/apps/anthropic"
 export ANTHROPIC_AUTH_TOKEN="${CODE_API_KEY}"
 export ANTHROPIC_MODEL="qwen3-coder-plus"
 # 可选：小模型/快模型（如果你希望 Claude Code 内部“快请求”走更便宜的）
-export ANTHROPIC_SMALL_FAST_MODEL="qwen3-coder-plus"
+export ANTHROPIC_SMALL_FAST_MODEL="qwen3-coder-flash"

@@ -5,7 +5,47 @@ return {
   -- 配置触发规则，如果写少了，可能就不会触发autocomplete
   event = { "BufNewFile", "BufReadPost", "BufEnter" },
 
-  opts = {
+  opts = function()
+    -- 统一从 ~/.env 读取补全相关变量，避免多处配置不一致
+    -- AUTOCOMPLETE_API_BASE：OpenAI 兼容接口地址（不含 /completions）
+    -- AUTOCOMPLETE_API_KEY：API Key（本地模型可留空）
+    -- AUTOCOMPLETE_MODEL：模型名（远端或本地）
+    local api_base = os.getenv("AUTOCOMPLETE_API_BASE")
+    local api_key = os.getenv("AUTOCOMPLETE_API_KEY")
+    local model = os.getenv("AUTOCOMPLETE_MODEL")
+    -- DashScope 兼容模式对 streaming 支持不稳定，检测到域名时关闭流式
+    local is_dashscope = api_base ~= nil and api_base:find("dashscope.aliyuncs.com", 1, true) ~= nil
+
+    -- 统一 OpenAI 兼容接口配置，按环境变量决定是远端还是本地
+    local provider = "openai_fim_compatible"
+    -- 如果没有配置 API Base，则按本地默认地址处理
+    local is_remote = api_base ~= nil and api_base ~= ""
+    local provider_options = {
+      openai_fim_compatible = {
+        name = is_remote and "remote" or "ollama",
+        end_point = is_remote and (api_base .. "/completions") or "http://127.0.0.1:11434/v1/completions",
+        model = model,
+        -- 关键：用函数返回字面量，避免被当成 env 名字解析
+        api_key = function()
+          if is_remote then
+            return api_key or ""
+          end
+          return "dummy"
+        end,
+        stream = not is_dashscope,
+        optional = {
+          n = 1,
+          -- 限制单次补全长度，避免一次性生成过多不准内容
+          max_tokens = 48,
+          top_p = 0.9,
+          temperature = 0.2,
+          -- 大模型返回到什么内容后停止
+          stop = { "\n\n" },
+        },
+      },
+    }
+
+    return {
     -- Copilot 式灰字
     virtualtext = {
       -- 全文件类型自动触发（嫌贵就列举具体 ft）
@@ -27,27 +67,8 @@ return {
     -- LLM 不保证严格返回 N 条，但这里设 1 基本能避免 (1/2)(1/3) 的轮换。
     n_completions = 1,
 
-    provider = "openai_fim_compatible", -- 示例：走 /v1/completions
-    provider_options = {
-      openai_fim_compatible = {
-        name = "ollama",
-        end_point = "http://127.0.0.1:11434/v1/completions",
-        model = os.getenv("OLLAMA_COMPLETION_MODEL"),
-        -- 关键：用函数返回字面量，避免被当成 env 名字解析
-        api_key = function()
-          return "dummy"
-        end,
-        stream = true,
-        optional = {
-          n = 1,
-          max_tokens = 96,
-          top_p = 0.9,
-          temperature = 0.2,
-          -- 大模型返回到什么内容后停止
-          stop = { "\n\n" },
-        },
-      },
-    },
+    provider = provider, -- 统一走 OpenAI 兼容接口（本地或远端）
+    provider_options = provider_options,
     -- 提示级别：false（全关）|"debug"|"verbose"|"warn"|"error"。
     -- 排障用 "debug"，日常建议 "warn"/"error"。
     notify = "warn",
@@ -76,5 +97,6 @@ return {
 
     -- 与上类似，但裁剪“候选的前缀”。用于避免把已经打出来的前缀重复再生成一次。
     before_cursor_filter_length = 5,
-  },
+    }
+  end,
 }

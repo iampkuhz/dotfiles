@@ -51,8 +51,6 @@ models:
     defaultCompletionOptions:
       temperature: 0.1
       maxTokens: 3000
-
-
 context:
   - provider: code
   - provider: docs

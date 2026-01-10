@@ -1,6 +1,32 @@
 -- utf8
 vim.g.encoding = "UTF-8"
 vim.o.fileencoding = "utf-8"
+
+-- 从 ~/.env 读取补全相关配置，避免 IDE 内置终端不加载 shell 环境
+local function load_env_file(path)
+  local file = io.open(path, "r")
+  if not file then
+    return
+  end
+  for line in file:lines() do
+    -- 跳过空行与注释，只解析 KEY=VALUE 形式
+    local trimmed = line:gsub("^%s+", ""):gsub("%s+$", "")
+    if trimmed ~= "" and not trimmed:match("^#") then
+      local key, value = trimmed:match("^([%w_]+)%s*=%s*(.*)$")
+      if key and value then
+        -- 兼容引号包裹的值，且不覆盖已有环境变量
+        value = value:gsub("^['\"]", ""):gsub("['\"]$", "")
+        if vim.env[key] == nil or vim.env[key] == "" then
+          vim.env[key] = value
+        end
+      end
+    end
+  end
+  file:close()
+end
+
+load_env_file((os.getenv("HOME") or "") .. "/.env")
+
 -- jk移动时光标下上方保留4行
 vim.o.scrolloff = 4
 vim.o.sidescrolloff = 4
