@@ -129,12 +129,11 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
-      local lspconfig = require("lspconfig")
       -- 让 cmp-nvim-lsp 获取正确的 capabilities
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
       -- 例：配置 lua_ls（原 sumneko_lua）语言服务器
-      lspconfig.lua_ls.setup({
+      local lua_ls_config = {
         capabilities = capabilities,
         settings = {
           Lua = {
@@ -143,17 +142,36 @@ return {
             },
           },
         },
-      })
+      }
 
-      -- Grammarly 在 Node v24 下偶发解析本地 wasm 路径报错，
-      -- 这里通过环境变量关闭 fetch（避免用 undici 处理 file path）。
-      lspconfig.grammarly.setup({
+      -- Grammarly 在 Node v24 下会把本地 wasm 路径当成 URL 解析而报错；
+      -- 如果你安装了 Node 20/22，可通过环境变量指定专用的 Node 路径：
+      -- export GRAMMARLY_NODE_PATH="$HOME/.nvm/versions/node/v20.x.x/bin/node"
+      local grammarly_node = os.getenv("GRAMMARLY_NODE_PATH")
+      local grammarly_config = {
         capabilities = capabilities,
-        cmd_env = {
-          -- 仅影响 grammarly 进程，不影响全局 Node
-          NODE_OPTIONS = "--no-experimental-fetch",
-        },
-      })
+      }
+      local grammarly_runner = vim.fn.stdpath("config") .. "/scripts/grammarly-wrapper.js"
+      local node_cmd = grammarly_node ~= nil and grammarly_node ~= "" and grammarly_node or "node"
+      -- 通过 wrapper 关闭全局 fetch，避免 undici 解析本地 wasm 路径报错
+      grammarly_config.cmd = {
+        node_cmd,
+        grammarly_runner,
+        "--stdio",
+      }
+
+      -- nvim 0.11+ 新增 vim.lsp.config，避免 lspconfig 框架警告
+      if vim.lsp.config ~= nil then
+        -- 用新版配置接口注册服务，再显式启用
+        vim.lsp.config("lua_ls", lua_ls_config)
+        vim.lsp.config("grammarly", grammarly_config)
+        vim.lsp.enable({ "lua_ls", "grammarly" })
+      else
+        -- 旧版回退到 lspconfig.setup，兼容较低版本
+        local lspconfig = require("lspconfig")
+        lspconfig.lua_ls.setup(lua_ls_config)
+        lspconfig.grammarly.setup(grammarly_config)
+      end
     end,
   },
 
