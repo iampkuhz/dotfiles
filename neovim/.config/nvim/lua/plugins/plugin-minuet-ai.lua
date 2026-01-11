@@ -18,8 +18,11 @@ return {
 
     -- 统一 OpenAI 兼容接口配置，按环境变量决定是远端还是本地
     local provider = "openai_fim_compatible"
-    -- 如果没有配置 API Base，则按本地默认地址处理
-    local is_remote = api_base ~= nil and api_base ~= ""
+    -- 如果 API Base 指向本机（localhost/127.0.0.1），视为本地服务
+    local is_local = api_base ~= nil
+      and (api_base:find("127.0.0.1", 1, true) ~= nil or api_base:find("localhost", 1, true) ~= nil)
+    -- 只有非本地且配置了 API Base 时，才按远端处理
+    local is_remote = api_base ~= nil and api_base ~= "" and not is_local
     local provider_options = {
       openai_fim_compatible = {
         name = is_remote and "remote" or "ollama",
@@ -27,6 +30,7 @@ return {
         model = model,
         -- 关键：用函数返回字面量，避免被当成 env 名字解析
         api_key = function()
+          -- 远端必须要 key；本地允许空 key（返回 dummy 避免插件报错）
           if is_remote then
             return api_key or ""
           end
@@ -36,7 +40,7 @@ return {
         optional = {
           n = 1,
           -- 限制单次补全长度，避免一次性生成过多不准内容
-          max_tokens = 48,
+          max_tokens = 24,
           top_p = 0.9,
           temperature = 0.2,
           -- 大模型返回到什么内容后停止

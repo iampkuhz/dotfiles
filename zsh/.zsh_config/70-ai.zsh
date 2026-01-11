@@ -23,10 +23,13 @@ fi
 
 # 本地启动 ollama start
 # 注入并生效到通过 launchd 启动的服务
-# launchctl setenv OLLAMA_KEEP_ALIVE 30m
+# launchctl setenv OLLAMA_KEEP_ALIVE 10m
 # launchctl setenv OLLAMA_NUM_PARALLEL 1
 # launchctl setenv OLLAMA_MAX_LOADED_MODELS 1
+# 如果需要打开调试日志： launchctl setenv OLLAMA_DEBUG "1"
+# 关闭调试日志：  launchctl unsetenv OLLAMA_DEBUG
 # brew services restart ollama
+# 查看本地 ollama 日志： tail -f /opt/homebrew/var/log/ollama.log
 # 本地启动 ollama end
 
 # 用百炼 API KEY 替换 YOUR_DASHSCOPE_API_KEY
