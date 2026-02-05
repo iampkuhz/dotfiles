@@ -1,10 +1,25 @@
 name: 本地+远程助手
 version: 1.0.0
 schema: v1
-
 models:
-  # ========= 行内补全（统一走 OpenAI 兼容接口：可指向 OpenAI 云 or 本地 Ollama）=========
-  - name: Autocomplete-${{ secrets.AUTOCOMPLETE_MODEL }}
+  - name: Llama 3.1 8B
+    provider: ollama
+    model: llama3.1:8b
+    roles:
+      - chat
+      - edit
+      - apply
+  - name: Qwen2.5-Coder 1.5B
+    provider: ollama
+    model: qwen2.5-coder:1.5b-base
+    roles:
+      - autocomplete
+  - name: Nomic Embed
+    provider: ollama
+    model: nomic-embed-text:latest
+    roles:
+      - embed
+  - name: ${{ secrets.AUTOCOMPLETE_MODEL }}
     provider: openai
     model: ${{ secrets.AUTOCOMPLETE_MODEL }}
     apiBase: ${{ secrets.AUTOCOMPLETE_API_BASE }}
@@ -19,9 +34,7 @@ models:
       debounceDelay: 1000
       modelTimeout: 12000
       onlyMyCode: true
-
-  # ========= Chat / Edit / Apply（同样走 OpenAI 兼容接口：默认用 OpenAI 云）=========
-  - name: Chat-${{ secrets.CHAT_MODEL }}
+  - name: ${{ secrets.CHAT_MODEL }}
     provider: openai
     model: ${{ secrets.CHAT_MODEL }}
     apiBase: ${{ secrets.CHAT_API_BASE }}
@@ -35,9 +48,7 @@ models:
     defaultCompletionOptions:
       temperature: 0.2
       maxTokens: 1500
-
-  # ========= Code（专用于代码生成/重构/复杂改动；走 Qwen OpenAI 兼容）=========
-  - name: Code-${{ secrets.CODE_MODEL }}
+  - name: ${{ secrets.CODE_MODEL }}
     provider: openai
     model: ${{ secrets.CODE_MODEL }}
     apiBase: ${{ secrets.CODE_API_BASE }}

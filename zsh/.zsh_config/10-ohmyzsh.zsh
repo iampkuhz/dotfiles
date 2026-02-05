@@ -11,7 +11,7 @@ zstyle ':omz:update' frequency 13
 DISABLE_MAGIC_FUNCTIONS="true"
 
 # 自动纠错
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 
 # 历史记录时间戳格式
 HIST_STAMPS="yyyy-mm-dd"

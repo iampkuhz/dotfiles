@@ -31,12 +31,3 @@ fi
 # brew services restart ollama
 # 查看本地 ollama 日志： tail -f /opt/homebrew/var/log/ollama.log
 # 本地启动 ollama end
-
-# 用百炼 API KEY 替换 YOUR_DASHSCOPE_API_KEY
-export ANTHROPIC_BASE_URL="https://dashscope.aliyuncs.com/apps/anthropic"
-#API_KEY 和 ANTHROPIC_AUTH_TOKEN 二选一，调试发现 AUTH_TOKEN 有效
-#export ANTHROPIC_API_KEY="${CODE_API_KEY}"
-export ANTHROPIC_AUTH_TOKEN="${CODE_API_KEY}"
-export ANTHROPIC_MODEL="qwen3-coder-plus"
-# 可选：小模型/快模型（如果你希望 Claude Code 内部“快请求”走更便宜的）
-export ANTHROPIC_SMALL_FAST_MODEL="qwen3-coder-flash"
