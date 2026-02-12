@@ -13,7 +13,27 @@ fi
 # =========================
 ZSH_CONFIG_DIR="$HOME/.zsh_config"
 if [[ -d "$ZSH_CONFIG_DIR" ]]; then
+  # 启动性能观测开关：1=打印每个 zsh 配置脚本的结束时间和耗时，0=关闭打印。
+  # 你可以在 ~/.env 里设置 ZSH_STARTUP_PROFILE=0 来关闭。
+  : ${ZSH_STARTUP_PROFILE:=1}
+
+  # 启用 EPOCHREALTIME（秒级浮点时间戳），用于计算 source 每个脚本的耗时。
+  # 这里直接加载 zsh/datetime，避免某些环境下 `-F b:EPOCHREALTIME` 早期不可用导致前几个脚本漏记。
+  zmodload zsh/datetime 2>/dev/null || true
+
   for f in "$ZSH_CONFIG_DIR"/*.zsh(N); do
+    _zsh_file_start="$EPOCHREALTIME"
     source "$f"
+
+    if [[ "$ZSH_STARTUP_PROFILE" == "1" && -n "${EPOCHREALTIME:-}" && -n "${_zsh_file_start:-}" ]]; then
+      _zsh_file_end="$EPOCHREALTIME"
+      _zsh_file_cost_ms=$(( (_zsh_file_end - _zsh_file_start) * 1000.0 ))
+      strftime -s _zsh_end_ts "%Y-%m-%d %H:%M:%S" "$EPOCHSECONDS"
+      printf '[zsh-startup] end=%s end_epoch=%.3f file=%s cost=%.2fms\n' \
+        "$_zsh_end_ts" "$_zsh_file_end" "${f:t}" "$_zsh_file_cost_ms"
+    fi
   done
+
+  unset _zsh_file_start _zsh_file_end _zsh_file_cost_ms _zsh_end_ts
 fi
+

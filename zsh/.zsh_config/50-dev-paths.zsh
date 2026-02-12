@@ -11,12 +11,8 @@ path_prepend "$HOME/.local/share/solana/install/active_release/bin"
 #只有安装了 postgresql@18 才加到环境变量里面
 # 启动： brew services start postgresql@18
 
-if command -v brew >/dev/null 2>&1 && brew --prefix postgresql@18 >/dev/null 2>&1; then
-  local _pg_bin
-  _pg_bin="$(brew --prefix postgresql@18)/bin"
-  if [[ -d "${_pg_bin}" ]]; then
-    path=("${_pg_bin}" $path)
-  fi
-  unset _pg_bin
+# 启动加速：避免每次 shell 启动都调用 `brew --prefix`（外部进程开销较大）。
+# 对于 Apple Silicon，brew 标准安装路径固定为 /opt/homebrew/opt/<formula>/bin，可直接检测目录。
+if [[ -d "/opt/homebrew/opt/postgresql@18/bin" ]]; then
+  path=("/opt/homebrew/opt/postgresql@18/bin" $path)
 fi
-

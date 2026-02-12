@@ -18,7 +18,28 @@ HIST_STAMPS="yyyy-mm-dd"
 
 # 插件列表
 plugins=(
+  # 以下插件由 oh-my-zsh 内置，主要用于补全与常用别名。
+  # 这类命令可以直接通过 plugins 参数启用，不需要额外安装第三方插件仓库。
   git
+  kubectl
+  aws
+  brew
+  docker
+  docker-compose
+  gh
+  helm
+  node
+  npm
+  pip
+  poetry
+  python
+  rust
+  terraform
+  uv
+  yarn
+
+  # 以下是第三方增强插件（需要 bootstrap/ohmyzsh.sh 安装到 custom/plugins）。
+
   # 当前行补全提示，按 → 接受
   zsh-autosuggestions
 
@@ -28,11 +49,17 @@ plugins=(
   # 更强的补全体验
   zsh-autocomplete
 
-  kubectl
-
   # https://github.com/Katrovsky/zsh-ollama-completion
   ollama
 )
+
+# codex 补全插件由 bootstrap/ohmyzsh.sh 生成到 custom/plugins/codex。
+# 为了避免首次启动时出现 `[oh-my-zsh] plugin 'codex' not found`，这里按文件存在再启用。
+_codex_plugin_file="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/codex/codex.plugin.zsh"
+if [[ -r "$_codex_plugin_file" ]]; then
+  plugins+=(codex)
+fi
+unset _codex_plugin_file
 
 # 加载 oh-my-zsh（必须在 plugins / theme 之后）
 source "$ZSH/oh-my-zsh.sh"

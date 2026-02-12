@@ -13,7 +13,7 @@ typeset -U path PATH
 path_prepend() { [[ -d "$1" ]] && path=("$1" $path); }
 
 # 将目录加到 PATH 最后面（目录存在才加）
-path_append()  { [[ -d "$1" ]] && path=($path "$1"); }
+path_append() { [[ -d "$1" ]] && path=($path "$1"); }
 
 # CLI 工具 需要打开 external editor 时的 editor选择
 export VISUAL="nvim"

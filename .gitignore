@@ -1,13 +1,19 @@
-
-*.log
-
-lazy-lock.json
-
-*.lock.*
-*-lock.*
-
+# macOS 系统文件
 .DS_Store
 
-.idea/
+# 视频总结过程中产生的字幕与转写文件（避免误提交）
+*.vtt
+*.srt
+*.json
 
-tmp
+# 视频/音频下载产物（仅做中间处理）
+*.mp3
+*.m4a
+*.wav
+*.flac
+*.mp4
+*.mkv
+
+# 临时目录
+/tmp/
+/.idea/
