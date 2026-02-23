@@ -61,5 +61,13 @@ if [[ -r "$_codex_plugin_file" ]]; then
 fi
 unset _codex_plugin_file
 
+# openclaw 补全插件由 bootstrap/ohmyzsh.sh 生成到 custom/plugins/openclaw。
+# 与 codex 相同：只有插件文件存在时才加入 plugins，避免首次启动时报 plugin not found。
+_openclaw_plugin_file="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/plugins/openclaw/openclaw.plugin.zsh"
+if [[ -r "$_openclaw_plugin_file" ]]; then
+  plugins+=(openclaw)
+fi
+unset _openclaw_plugin_file
+
 # 加载 oh-my-zsh（必须在 plugins / theme 之后）
 source "$ZSH/oh-my-zsh.sh"

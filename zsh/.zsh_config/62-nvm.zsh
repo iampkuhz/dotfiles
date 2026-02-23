@@ -1,6 +1,6 @@
 # nvm：Node 多版本管理
 # 启动加速策略：zsh 启动时不立即 source nvm.sh，而是在首次用到 nvm/node/npm/npx 时再加载。
-export NVM_DIR="$HOME/.nvm"
+: "${NVM_DIR:="$HOME/.nvm"}"
 
 _lazy_load_nvm() {
   # 防止重复加载：第一次加载完成后移除函数包装。

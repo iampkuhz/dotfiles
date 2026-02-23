@@ -63,4 +63,14 @@ cat >"$ZSH_CUSTOM_DIR/plugins/codex/codex.plugin.zsh" <<'EOF'
 (( $+commands[codex] )) && eval "$(codex completion zsh)"
 EOF
 
+# OpenClaw 也采用同样方式：把补全注册放到 custom plugin 中，统一由 oh-my-zsh 管理加载时机。
+# 这样即使机器上暂时没有 openclaw，也不会在 shell 启动时报错。
+mkdir -p "$ZSH_CUSTOM_DIR/plugins/openclaw"
+cat >"$ZSH_CUSTOM_DIR/plugins/openclaw/openclaw.plugin.zsh" <<'EOF'
+# 仅在 openclaw 命令存在时启用补全，避免未安装 openclaw 时启动报错。
+# OpenClaw 新版 completion 子命令使用 `--shell` 指定类型（默认 zsh）。
+# 启动阶段静默 stderr，避免本地 openclaw 配置不完整时污染终端输出。
+(( $+commands[openclaw] )) && eval "$(openclaw completion --shell zsh 2>/dev/null)"
+EOF
+
 echo "✅ oh-my-zsh 与相关插件安装/更新完成"
