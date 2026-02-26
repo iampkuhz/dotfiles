@@ -7,6 +7,12 @@ path_prepend "/opt/homebrew/opt/perl/bin"
 # Solana CLI
 path_prepend "$HOME/.local/share/solana/install/active_release/bin"
 
+# LM Studio CLI
+path_prepend "$HOME/.lmstudio/bin"
+
+# utoo-proxy
+path_prepend "$HOME/.utoo-proxy"
+
 # postgresql
 #只有安装了 postgresql@18 才加到环境变量里面
 # 启动： brew services start postgresql@18
