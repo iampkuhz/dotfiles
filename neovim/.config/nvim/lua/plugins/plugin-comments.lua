@@ -1,4 +1,10 @@
 -- 代码注释工具
+-- 快捷键清单（每行一个）：
+-- todo-comments：本文件未显式定义快捷键。
+-- Comment.nvim `gcc`：注释/取消注释当前行。
+-- Comment.nvim `gbc`：块注释/取消注释当前行。
+-- Comment.nvim `vipgc`：可视模式下按行注释选区。
+-- Comment.nvim `vipgb`：可视模式下按块注释选区。
 return {
 
   -- 插件：todo-comments，支持多种todo类型

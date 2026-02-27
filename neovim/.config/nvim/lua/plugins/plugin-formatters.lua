@@ -1,3 +1,5 @@
+-- 快捷键清单（每行一个）：
+-- conform.nvim `<leader>f`：格式化当前缓冲区（支持 normal/visual 等模式）。
 return {
   {
     "stevearc/conform.nvim",

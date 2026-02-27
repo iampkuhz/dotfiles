@@ -1,4 +1,7 @@
 -- lua/plugins/minuet.lua
+-- 快捷键清单（每行一个）：
+-- minuet-ai `<C-;>`：接受当前灰字补全。
+-- minuet-ai `<C-e>`：关闭当前灰字补全提示。
 return {
   "milanglacier/minuet-ai.nvim",
   dependencies = { "nvim-lua/plenary.nvim" },

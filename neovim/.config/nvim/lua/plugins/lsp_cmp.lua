@@ -1,5 +1,12 @@
 -- 文件: lua/plugins/lsp_cmp.lua
 -- 代码自动补全配置
+-- 快捷键清单（每行一个）：
+-- nvim-cmp `<CR>`：确认当前补全项（插入模式补全菜单）。
+-- nvim-cmp `<Tab>`：选择下一个补全项（插入模式补全菜单）。
+-- nvim-cmp `<S-Tab>`：选择上一个补全项（插入模式补全菜单）。
+-- 命令行模式 `<Tab>`：触发命令行补全。
+-- nvim-lspconfig：本文件未定义快捷键。
+-- mason.nvim：本文件未定义快捷键。
 return {
   -- 1. 自动补全框架 nvim-cmp 本体
   {

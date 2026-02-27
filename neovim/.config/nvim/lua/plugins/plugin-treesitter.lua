@@ -1,5 +1,17 @@
 -- 文件高亮、缩进工具，需要安装node
 --
+-- 快捷键清单（每行一个）：
+-- treesitter `gnn`：初始化增量选择。
+-- treesitter `grn`：扩大到下一个语法节点。
+-- treesitter `grc`：扩大到语法作用域。
+-- treesitter `grm`：缩小到上一个语法节点。
+-- fold `zc`：关闭当前 fold。
+-- fold `zo`：打开当前 fold。
+-- fold `za`：切换当前 fold 开关。
+-- fold `zM`：关闭所有 fold。
+-- fold `zR`：打开所有 fold。
+-- 缩进 `=`：按语法缩进当前行/选区。
+-- 缩进 `gg=G`：从首行到末行整文件缩进。
 -- folding 相关快捷键：
 -- `zc` 关闭fold
 -- `zo` 打开fold

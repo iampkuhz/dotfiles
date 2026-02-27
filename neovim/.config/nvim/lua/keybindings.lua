@@ -21,6 +21,10 @@ map("i", "<C-l>", "<ESC>A", opt)
 map("n", "<C-u>", "16k", opt)
 map("n", "<C-d>", "16j", opt)
 
+-- 文本显示类快捷键
+-- `<Leader>ww`：切换当前窗口自动换行（wrap），比 `<Leader>tw` 更直观
+map("n", "<Leader>ww", ":setlocal wrap!<CR>", opt)
+
 -- visual模式下缩进代码
 map("v", "<", "<gv", opt)
 map("v", ">", ">gv", opt)

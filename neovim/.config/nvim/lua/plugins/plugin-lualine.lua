@@ -1,5 +1,7 @@
 -- 界面最下面的状态栏
 --
+-- 快捷键清单（每行一个）：
+-- 本文件插件未定义快捷键。
 return {
   {
     'nvim-lualine/lualine.nvim',
