@@ -1,0 +1,7 @@
+<clickhouse>
+    <http_port>8124</http_port>
+    <tcp_port>9001</tcp_port>
+    <http_port_2 remove="1"/>
+    <tcp_port_2 remove="1"/>
+    <listen_host>0.0.0.0</listen_host>
+</clickhouse>

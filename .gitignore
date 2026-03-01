@@ -17,3 +17,7 @@
 # 临时目录
 /tmp/
 /.idea/
+
+# 可观测配置中的本地密钥文件（只提交 .env.example）
+/observability/litellm/.env
+/observability/langfuse/.env

@@ -14,7 +14,7 @@ brew install yarn yamlfmt pdf2svg
 brew install shfmt stylua
 
 # 其他常用工具
-brew install imagemagick grip wget
+brew install imagemagick grip wget podman-compose
 
 
 # ===========================================================================

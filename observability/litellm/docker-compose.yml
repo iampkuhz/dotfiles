@@ -1,0 +1,23 @@
+services:
+  litellm:
+    image: docker.litellm.ai/berriai/litellm:main-latest
+    container_name: litellm-proxy
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    # 变量由当前 shell 传入（你的 zsh 已从 ~/.env 加载）。
+    environment:
+      - LITELLM_MASTER_KEY
+      - LANGFUSE_PUBLIC_KEY
+      - LANGFUSE_SECRET_KEY
+      - REMOTE_MODEL_ID
+      - REMOTE_UPSTREAM_BASE_URL
+      - REMOTE_UPSTREAM_API_KEY
+    command:
+      - "--config"
+      - "/app/config.yaml"
+      - "--port"
+      - "4000"
+    volumes:
+      # 通过 LITELLM_CONFIG_FILE 选择配置文件（remote/lmstudio）。
+      - ${LITELLM_CONFIG_FILE:-./config.lmstudio.yaml}:/app/config.yaml:ro
