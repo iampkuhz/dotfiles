@@ -5,6 +5,8 @@ services:
     restart: unless-stopped
     ports:
       - "4000:4000"
+    # 变量由当前 shell 传入。
+    # 你的 zsh 已负责把 ~/.env 加载进环境，所以这里不再依赖当前目录下的 .env 文件。
     environment:
       - LITELLM_MASTER_KEY
       - LANGFUSE_PUBLIC_KEY
@@ -12,11 +14,26 @@ services:
       - LITELLM_UPSTREAM_MODEL
       - LITELLM_UPSTREAM_BASE_URL
       - LITELLM_UPSTREAM_API_KEY
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@host.containers.internal:5433/postgres
+      # 容器内的 Prisma / LiteLLM 启动阶段会访问本地回环地址与宿主机端口。
+      # 如果继承了宿主机的全局代理，这些内部请求会被错误转发，表现为 EngineRequestError: 502。
+      # 这里显式清空代理，并补上本地直连白名单，避免本机服务被代理污染。
+      - HTTP_PROXY=
+      - HTTPS_PROXY=
+      - http_proxy=
+      - https_proxy=
+      - NO_PROXY=127.0.0.1,localhost,host.containers.internal
+      - no_proxy=127.0.0.1,localhost,host.containers.internal
+      # LiteLLM 与 Langfuse 复用同一个 PostgreSQL 实例，但不能共用同一个数据库。
+      # 否则两边的 Prisma 迁移会写进同一套 public schema，导致表结构和迁移记录互相污染。
+      # 这里单独使用 litellm 数据库，避免和 Langfuse 的 postgres 数据库冲突。
+      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@host.containers.internal:5433/litellm
     command:
       - "--config"
       - "/app/config.yaml"
       - "--port"
       - "4000"
+      # 这版 main-latest 在 prisma migrate + post-migration sanity check 阶段会反复生成 baseline_diff，
+      # 导致服务一直卡在 startup。这里切换为 prisma db push，绕过有问题的迁移检查路径。
+      - "--use_prisma_db_push"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
