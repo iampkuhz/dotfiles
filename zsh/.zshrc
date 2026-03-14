@@ -36,3 +36,6 @@ if [[ -d "$ZSH_CONFIG_DIR" ]]; then
 
   unset _zsh_file_start _zsh_file_end _zsh_file_cost_ms _zsh_end_ts
 fi
+
+# OpenClaw Completion
+source "/Users/zhehan/.openclaw/completions/openclaw.zsh"
