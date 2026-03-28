@@ -1,3 +1,10 @@
+# OPENSPEC:START
+# OpenSpec-cn shell 补全配置
+fpath=("/Users/zhehan/.oh-my-zsh/custom/completions" $fpath)
+autoload -Uz compinit
+compinit
+# OPENSPEC:END
+
 # =========================
 # 1) 加载全局私有环境变量文件：~/.env（不进 git）
 # =========================

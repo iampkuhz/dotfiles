@@ -17,15 +17,11 @@
 
 变量模板见：`/Users/zhehan/Documents/tools/dotfiles/observability/litellm/.env.example`
 
-## 直接执行命令
+## 常见常见
+1. 修改 `config.yaml`
+
 ```bash
-cd /Users/zhehan/Documents/tools/dotfiles/observability/litellm
-
-# 拉取镜像
-podman pull docker.litellm.ai/berriai/litellm:main-latest
-
-# 启动（当前 shell 需要已经带上 ~/.env 中的变量）
-podman compose up -d
+podman compose restart litellm
 ```
 
 ## 查看状态

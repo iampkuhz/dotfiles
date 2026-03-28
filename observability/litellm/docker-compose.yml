@@ -7,13 +7,22 @@ services:
       - "4000:4000"
     # 变量由当前 shell 传入。
     # 你的 zsh 已负责把 ~/.env 加载进环境，所以这里不再依赖当前目录下的 .env 文件。
+    # 这里写成仅列变量名的形式，含义是“把宿主机当前 shell 中同名环境变量透传进容器”。
+    # 如果宿主机里不存在该变量，容器内就会得到空值，像 LiteLLM 这种依赖启动配置的服务就可能直接启动失败。
     environment:
       - LITELLM_MASTER_KEY
       - LANGFUSE_PUBLIC_KEY
       - LANGFUSE_SECRET_KEY
-      - LITELLM_UPSTREAM_MODEL
-      - LITELLM_UPSTREAM_BASE_URL
-      - LITELLM_UPSTREAM_API_KEY
+      # 下面这组变量对应 config.yaml 里新接入的百炼 / Qwen 模型配置。
+      # 只改 config.yaml 不改这里时，容器读到的会是空字符串，最终表现为 LiteLLM 报 model 为 None。
+      # 这里额外透传 model_name 用到的两个变量。
+      # 因为你现在把 YAML 里的 model_name 也改成了 os.environ/...，少这两个变量时服务会在启动阶段直接崩掉。
+      - LITELLM_OPENAI_QWEN_MODEL
+      - LITELLM_ANTHROPIC_QWEN_MODEL
+      - QWEN_MODEL_NAME
+      - BAILIAN_CODING_PLAN_OPENAI_BASE_URL
+      - BAILIAN_CODING_PLAN_ANTHROPIC_BASE_URL
+      - BAILIAN_CODING_PLAN_API_KEY
       # 容器内的 Prisma / LiteLLM 启动阶段会访问本地回环地址与宿主机端口。
       # 如果继承了宿主机的全局代理，这些内部请求会被错误转发，表现为 EngineRequestError: 502。
       # 这里显式清空代理，并补上本地直连白名单，避免本机服务被代理污染。

@@ -1,9 +1,18 @@
 model_list:
-  - model_name: chat-model
+  - model_name: os.environ/LITELLM_OPENAI_QWEN_MODEL
     litellm_params:
-      model: os.environ/LITELLM_UPSTREAM_MODEL
-      api_base: os.environ/LITELLM_UPSTREAM_BASE_URL
-      api_key: os.environ/LITELLM_UPSTREAM_API_KEY
+      # 百炼这个 OpenAI 兼容端点要显式写成 openai/<模型名>，否则 LiteLLM 会把 deployment 判为不健康。
+      # 注意：LiteLLM 只支持把整个值写成 os.environ/变量名，不支持和前缀做字符串拼接。
+      model: openai/qwen3.5-plus
+      api_base: os.environ/BAILIAN_CODING_PLAN_OPENAI_BASE_URL
+      api_key: os.environ/BAILIAN_CODING_PLAN_API_KEY
+  - model_name: os.environ/LITELLM_ANTHROPIC_QWEN_MODEL
+    litellm_params:
+      # Anthropic 兼容端点同理，需要显式声明 anthropic provider。
+      # 不写前缀时，后台虽然能读到配置，但不会生成可用的 deployment，也不会出现在模型管理页里。
+      model: anthropic/qwen3.5-plus
+      api_base: os.environ/BAILIAN_CODING_PLAN_ANTHROPIC_BASE_URL
+      api_key: os.environ/BAILIAN_CODING_PLAN_API_KEY
 
 litellm_settings:
   success_callback: ["langfuse"]
