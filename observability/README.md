@@ -3,8 +3,6 @@
 > **当前默认方案：LiteLLM 轻量代理**
 >
 > 本目录提供 AI 应用的可观测性基础设施。**默认推荐使用 LiteLLM 轻量代理方案**，本地仅运行一个 LiteLLM 容器，观测数据可选择性发送到云端平台（Braintrust / Arize AX）。
->
-> **Langfuse 已删除**：自 2026-03-29 起，langfuse 目录及相关配置已彻底移除，不再作为可选方案。
 
 ---
 
@@ -41,8 +39,6 @@ OPENCLAW_MODEL_ID=qwen3.5-plus
 ```
 observability/
 ├── README.md              # 本文档
-├── ACCEPTANCE.md          # 验收与完成定义（DoD）
-├── MIGRATION.md           # 从 Langfuse 迁移指南（历史参考）
 └── litellm/
     ├── README.md          # LiteLLM 使用指南
     ├── docker-compose.yml # 容器编排配置

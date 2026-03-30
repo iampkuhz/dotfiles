@@ -56,8 +56,6 @@ services:
       - https_proxy=
       - NO_PROXY=127.0.0.1,localhost,host.containers.internal
       - no_proxy=127.0.0.1,localhost,host.containers.internal
-      # LiteLLM 与 Langfuse 复用同一个 PostgreSQL 实例，但不能共用同一个数据库。
-      # 否则两边的 Prisma 迁移会写进同一套 public schema，导致表结构和迁移记录互相污染。
       # 这里单独使用 litellm 数据库，避免和 Langfuse 的 postgres 数据库冲突。
       # 容器内使用服务名 litellm-db 和端口 5432 连接
       # 注意：使用 litellm 用户（由 POSTGRES_USER 设置）而非 postgres 超级用户
