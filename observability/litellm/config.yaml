@@ -1,25 +1,30 @@
+# LiteLLM 配置
+# 定位：统一多模型代理，简洁配置，适合个人本地使用
+# 观测：不强制依赖任何本地观测组件，未来可通过 OTel 接入云端平台
+
 model_list:
   - model_name: os.environ/LITELLM_OPENAI_QWEN_MODEL
     litellm_params:
-      # 百炼这个 OpenAI 兼容端点要显式写成 openai/<模型名>，否则 LiteLLM 会把 deployment 判为不健康。
-      # 注意：LiteLLM 只支持把整个值写成 os.environ/变量名，不支持和前缀做字符串拼接。
+      # 百炼 OpenAI 兼容端点
       model: openai/qwen3.5-plus
       api_base: os.environ/BAILIAN_CODING_PLAN_OPENAI_BASE_URL
       api_key: os.environ/BAILIAN_CODING_PLAN_API_KEY
+
   - model_name: os.environ/LITELLM_ANTHROPIC_QWEN_MODEL
     litellm_params:
-      # Anthropic 兼容端点同理，需要显式声明 anthropic provider。
-      # 不写前缀时，后台虽然能读到配置，但不会生成可用的 deployment，也不会出现在模型管理页里。
+      # 百炼 Anthropic 兼容端点
       model: anthropic/qwen3.5-plus
       api_base: os.environ/BAILIAN_CODING_PLAN_ANTHROPIC_BASE_URL
       api_key: os.environ/BAILIAN_CODING_PLAN_API_KEY
 
 litellm_settings:
-  success_callback: ["langfuse"]
-  failure_callback: ["langfuse"]
-  langfuse_host: http://host.containers.internal:3000
-  langfuse_public_key: os.environ/LANGFUSE_PUBLIC_KEY
-  langfuse_secret: os.environ/LANGFUSE_SECRET_KEY
+  # ===== 观测回调 =====
+  # 当前不配置任何本地观测回调
+  # 未来接入 Braintrust / Arize AX 时，只需配置 OTel 环境变量：
+  # - OTEL_EXPORTER_OTLP_ENDPOINT
+  # - OTEL_EXPORTER_OTLP_HEADERS
+  # - USE_OTEL_LITELLM_REQUEST_SPAN=true
+  # LiteLLM 会自动输出标准 OTel spans
 
 general_settings:
   master_key: os.environ/LITELLM_MASTER_KEY

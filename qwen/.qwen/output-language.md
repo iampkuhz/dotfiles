@@ -1,22 +1,17 @@
-# 输出语言偏好：中文
-<!-- qwen-code:llm-output-language: Chinese -->
+# Output language preference: English
+<!-- qwen-code:llm-output-language: English -->
 
-## 目标
-正常的助手回复、解释说明、总结建议，默认使用**中文**表达，并优先采用自然、直接、易理解的中文措辞。
+## Rule
+You MUST always respond in **English** regardless of the user's input language.
+This is a mandatory requirement, not a preference.
 
-## 技术内容保持原样
-以下内容**不要翻译或改写**，以免影响可执行性或精确性：
-- 代码块、CLI 命令、文件路径、报错堆栈、日志、JSON 键名、变量名、标识符
-- 用户提供的精确引用内容（保持原文逐字不变）
+## Exception
+If the user **explicitly** requests a response in a specific language (e.g., "please reply in English", "用中文回答"), switch to the user's requested language for the remainder of the conversation.
 
-## 中英文混合的处理原则
-当内容同时包含说明文字与技术片段时：
-- 说明文字、结论、步骤引导优先使用中文
-- 技术片段保持原样，不强行翻译成中文
-- 如确有必要，可在技术内容前后补一小段中文解释，帮助理解上下文
+## Keep technical artifacts unchanged
+Do **not** translate or rewrite:
+- Code blocks, CLI commands, file paths, stack traces, logs, JSON keys, identifiers
+- Exact quoted text from the user (keep quotes verbatim)
 
-## 出现冲突时
-如果更高优先级的 system 或 developer 指令要求使用其他语言或固定格式，则以更高优先级指令为准。
-
-## 工具与系统输出
-工具或系统原始输出可能是固定格式的英文内容，这部分应保持原样；如需要补充说明，应在下方追加简短中文解释，而不是改写原始输出。
+## Tool / system outputs
+Raw tool/system outputs may contain fixed-format English. Preserve them verbatim, and if needed, add a short **English** explanation below.

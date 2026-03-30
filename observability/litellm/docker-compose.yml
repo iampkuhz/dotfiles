@@ -1,48 +1,45 @@
+# LiteLLM 轻量代理 - Docker Compose 配置
+# 定位：本地 AI 模型网关，单一容器，低内存占用
+# 健康检查：4000 端口可访问即视为健康
+
 services:
   litellm:
-    image: docker.litellm.ai/berriai/litellm:main-latest
+    image: ghcr.io/berriai/litellm:main-latest
     container_name: litellm-proxy
     restart: unless-stopped
     ports:
       - "4000:4000"
-    # 变量由当前 shell 传入。
-    # 你的 zsh 已负责把 ~/.env 加载进环境，所以这里不再依赖当前目录下的 .env 文件。
-    # 这里写成仅列变量名的形式，含义是“把宿主机当前 shell 中同名环境变量透传进容器”。
-    # 如果宿主机里不存在该变量，容器内就会得到空值，像 LiteLLM 这种依赖启动配置的服务就可能直接启动失败。
+    # 环境变量从宿主机继承（确保启动前已 source ~/.env 或对应文件）
     environment:
+      # ===== 基础配置（必需） =====
       - LITELLM_MASTER_KEY
-      - LANGFUSE_PUBLIC_KEY
-      - LANGFUSE_SECRET_KEY
-      # 下面这组变量对应 config.yaml 里新接入的百炼 / Qwen 模型配置。
-      # 只改 config.yaml 不改这里时，容器读到的会是空字符串，最终表现为 LiteLLM 报 model 为 None。
-      # 这里额外透传 model_name 用到的两个变量。
-      # 因为你现在把 YAML 里的 model_name 也改成了 os.environ/...，少这两个变量时服务会在启动阶段直接崩掉。
       - LITELLM_OPENAI_QWEN_MODEL
       - LITELLM_ANTHROPIC_QWEN_MODEL
-      - QWEN_MODEL_NAME
       - BAILIAN_CODING_PLAN_OPENAI_BASE_URL
       - BAILIAN_CODING_PLAN_ANTHROPIC_BASE_URL
       - BAILIAN_CODING_PLAN_API_KEY
-      # 容器内的 Prisma / LiteLLM 启动阶段会访问本地回环地址与宿主机端口。
-      # 如果继承了宿主机的全局代理，这些内部请求会被错误转发，表现为 EngineRequestError: 502。
-      # 这里显式清空代理，并补上本地直连白名单，避免本机服务被代理污染。
+
+      # ===== 网络配置（防止代理污染） =====
+      # 容器内访问本地回环地址时不应经过代理
       - HTTP_PROXY=
       - HTTPS_PROXY=
       - http_proxy=
       - https_proxy=
       - NO_PROXY=127.0.0.1,localhost,host.containers.internal
       - no_proxy=127.0.0.1,localhost,host.containers.internal
-      # LiteLLM 与 Langfuse 复用同一个 PostgreSQL 实例，但不能共用同一个数据库。
-      # 否则两边的 Prisma 迁移会写进同一套 public schema，导致表结构和迁移记录互相污染。
-      # 这里单独使用 litellm 数据库，避免和 Langfuse 的 postgres 数据库冲突。
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@host.containers.internal:5433/litellm
     command:
       - "--config"
       - "/app/config.yaml"
       - "--port"
       - "4000"
-      # 这版 main-latest 在 prisma migrate + post-migration sanity check 阶段会反复生成 baseline_diff，
-      # 导致服务一直卡在 startup。这里切换为 prisma db push，绕过有问题的迁移检查路径。
+      # 绕过 prisma db baseline_diff 检查
       - "--use_prisma_db_push"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
+    # 健康检查：4000 端口可访问即视为健康
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:4000/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
