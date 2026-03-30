@@ -162,7 +162,7 @@ response = client.chat.completions.create(
 
 ## 历史说明
 
-### Langfuse 已删除
+### Langfuse 已彻底删除
 
 自 2026-03-29 起，langfuse 目录及相关配置已彻底移除。
 
@@ -171,5 +171,6 @@ response = client.chat.completions.create(
 - 不适合本地开发环境常驻
 - 观测数据可直送云端平台，无需本地中转
 
-**如需历史参考：**
-- 迁移指南见：[MIGRATION.md](./MIGRATION.md)（保留作为历史记录）
+**历史参考：**
+- 不再保留任何 langfuse 相关文件
+- 如需了解历史架构，请查看 git 历史记录
