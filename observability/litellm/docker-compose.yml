@@ -59,7 +59,9 @@ services:
       # LiteLLM 与 Langfuse 复用同一个 PostgreSQL 实例，但不能共用同一个数据库。
       # 否则两边的 Prisma 迁移会写进同一套 public schema，导致表结构和迁移记录互相污染。
       # 这里单独使用 litellm 数据库，避免和 Langfuse 的 postgres 数据库冲突。
-      - DATABASE_URL=postgresql://postgres:${POSTGRES_PASSWORD}@host.containers.internal:5433/litellm
+      # 容器内使用服务名 litellm-db 和端口 5432 连接
+      # 注意：使用 litellm 用户（由 POSTGRES_USER 设置）而非 postgres 超级用户
+      - DATABASE_URL=postgresql://litellm:${POSTGRES_PASSWORD}@litellm-db:5432/litellm
     command:
       - "--config"
       - "/app/config.yaml"
@@ -70,3 +72,15 @@ services:
       - "--use_prisma_db_push"
     volumes:
       - ./config.yaml:/app/config.yaml:ro
+    networks:
+      - litellm_network
+
+# 定义网络
+networks:
+  litellm_network:
+    driver: bridge
+
+# 定义数据卷
+volumes:
+  postgres_data:
+    driver: local
