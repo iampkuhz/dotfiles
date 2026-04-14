@@ -46,3 +46,6 @@ fi
 
 # OpenClaw Completion
 source "/Users/zhehan/.openclaw/completions/openclaw.zsh"
+
+# 直接使用 libpq，里面包括 psql 等命令，不需要安装完整的 postgresql
+export PATH="$(brew --prefix libpq)/bin:$PATH"
