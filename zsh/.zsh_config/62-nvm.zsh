@@ -2,30 +2,26 @@
 # 启动加速策略：zsh 启动时不立即 source nvm.sh，而是在首次用到 nvm/node/npm/npx 时再加载。
 : "${NVM_DIR:="$HOME/.nvm"}"
 
-_lazy_load_nvm() {
-  # 防止重复加载：第一次加载完成后移除函数包装。
-  unset -f nvm node npm npx _lazy_load_nvm
-
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  # 如果你需要 nvm 自带补全，再按需打开下一行（会略微增加首次加载耗时）。
-  # [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-}
-
-# 用同名函数占位：第一次调用时先加载 nvm，再继续执行原命令。
+# 每个 wrapper 自包含 lazy-load 逻辑，不依赖任何外部函数。
+# 这样在 Claude Code shell snapshot 恢复时也不会因缺失 helper 函数而报错。
 nvm() {
-  _lazy_load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  unset -f nvm node npm npx
   nvm "$@"
 }
 node() {
-  _lazy_load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  unset -f nvm node npm npx
   node "$@"
 }
 npm() {
-  _lazy_load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  unset -f nvm node npm npx
   npm "$@"
 }
 npx() {
-  _lazy_load_nvm
+  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+  unset -f nvm node npm npx
   npx "$@"
 }
 

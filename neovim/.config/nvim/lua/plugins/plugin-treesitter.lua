@@ -52,7 +52,6 @@ return {
           "json",
           "jq",
           "kotlin",
-          "latex",
           "nginx",
           "ruby",
           "toml",
