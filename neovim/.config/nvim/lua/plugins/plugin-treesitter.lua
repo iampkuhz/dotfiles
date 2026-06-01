@@ -1,10 +1,38 @@
--- 文件高亮、缩进工具，需要安装node
+-- Treesitter 语法高亮、缩进、折叠
 --
--- 快捷键清单（每行一个）：
--- treesitter `gnn`：初始化增量选择。
--- treesitter `grn`：扩大到下一个语法节点。
--- treesitter `grc`：扩大到语法作用域。
--- treesitter `grm`：缩小到上一个语法节点。
+-- ============================================================
+-- 安装 / 升级流程
+-- ============================================================
+--
+-- 1. 安装 tree-sitter-cli
+--    旧版 nvim-treesitter 只需 node，Neovim 0.12+ 必须装 tree-sitter-cli：
+--      brew install tree-sitter-cli        # macOS
+--      sudo apt install tree-sitter-cli    # Ubuntu / Debian
+--
+-- 2. 同步插件（拉取 nvim-treesitter main 分支并编译 parser）
+--    启动 Neovim 后执行：
+--      :Lazy sync
+--    或者命令行：
+--      nvim --headless "+Lazy! sync" +qa
+--
+-- 3. 更新所有已安装的 parser
+--      :TSUpdate
+--
+-- 4. 检查 health
+--      :checkhealth nvim-treesitter
+--    确认所有 parser 状态为 "installed"，无 ABI 版本不匹配警告。
+--
+-- 5. 如果 Markdown 仍报 "attempt to call method 'range' (a nil value)"
+--    说明旧 parser 缓存与 Neovim 0.12 treesitter API 不兼容，清理后重装：
+--      rm -rf ~/.local/share/nvim/site/parser
+--      rm -rf ~/.local/share/nvim/site/queries
+--      nvim +TSUpdate +qa
+--
+-- ============================================================
+--
+-- 适用环境：Neovim 0.12+  +  nvim-treesitter main 分支
+--
+-- 快捷键清单：
 -- fold `zc`：关闭当前 fold。
 -- fold `zo`：打开当前 fold。
 -- fold `za`：切换当前 fold 开关。
@@ -12,90 +40,134 @@
 -- fold `zR`：打开所有 fold。
 -- 缩进 `=`：按语法缩进当前行/选区。
 -- 缩进 `gg=G`：从首行到末行整文件缩进。
--- folding 相关快捷键：
--- `zc` 关闭fold
--- `zo` 打开fold
--- `za` 打开/关闭fold
--- `zM` 折叠所有fold
--- `zR` 打开所有fold
 --
--- WARN: indent不等于formatter，只能简单缩进对齐，无法识别语法
--- indent快捷键'=', 一般常用的indent方法 'gg=G' (跳转到第一行，然后indent到最后一行)
+-- 增量选择（incremental_selection）：
+--   旧版 nvim-treesitter 的 incremental_selection 模块在 Neovim 0.12 迁移后
+--   已不再维护。暂时关闭，等 treesitter 稳定后可用 Neovim 原生或独立插件替代。
+--
+-- WARN: indent 不等于 formatter，只能简单缩进对齐，无法识别语法
+-- indent 快捷键 '='，一般常用的 indent 方法 'gg=G'（跳转到第一行，然后 indent 到最后一行）
 return {
   {
     "nvim-treesitter/nvim-treesitter",
-    -- 注意：nvim-treesitter 安装后需要编译解析器，推荐加上 build = ":TSUpdate"
+    branch = "main",
+    lazy = false,
     build = ":TSUpdate",
     config = function()
-      require("nvim-treesitter.configs").setup({
-        -- 你要启用高亮的语言列表
-        ensure_installed = {
-          "lua",
-          "python",
-          "typescript",
-          "javascript",
-          "html",
-          "css",
-          "java",
-          "solidity",
-          "rust",
-          "markdown",
-          "elixir",
-          "erlang",
-          "scala",
-          "git_config",
-          "git_rebase",
-          "go",
-          "gpg",
-          "groovy",
-          "haskell",
-          "json",
-          "jq",
-          "kotlin",
-          "nginx",
-          "ruby",
-          "toml",
-          "vim",
-          "vimdoc",
-          "xml",
-          "yaml",
-          "bash",
-        },
-        -- 或者安装所有支持的语言（但比较耗时）
-        -- ensure_installed = "all",
+      local ensure_installed = {
+        "lua",
+        "python",
+        "typescript",
+        "javascript",
+        "html",
+        "css",
+        "java",
+        "solidity",
+        "rust",
+        "markdown",
+        "markdown_inline",
+        "elixir",
+        "erlang",
+        "scala",
+        "git_config",
+        "git_rebase",
+        "go",
+        "gpg",
+        "groovy",
+        "haskell",
+        "json",
+        "jq",
+        "kotlin",
+        "nginx",
+        "ruby",
+        "toml",
+        "vim",
+        "vimdoc",
+        "xml",
+        "yaml",
+        "bash",
+      }
 
-        -- 同步安装（仅在 `ensure_installed` 为列表时有效）
-        sync_install = false,
+      local ok, treesitter = pcall(require, "nvim-treesitter")
+      if not ok then
+        return
+      end
 
-        -- 如果安装语言失败，继续其他的安装，不中断
-        ignore_install = {},
-
-        highlight = {
-          enable = true, -- 启用基于 Treesitter 的语法高亮
-          additional_vim_regex_highlighting = false,
-        },
-
-        -- 其它你需要启用的模块，比如增量选择、缩进、彩虹括号等，都可以在这里配置
-        incremental_selection = {
-          enable = true,
-          keymaps = {
-            init_selection = "gnn",
-            node_incremental = "grn",
-            scope_incremental = "grc",
-            node_decremental = "grm",
-          },
-        },
-        indent = {
-          enable = true,
-        },
+      -- 新版 setup：指定 parser 安装目录
+      treesitter.setup({
+        install_dir = vim.fn.stdpath("data") .. "/site",
       })
-      --
-      -- 开启 Folding
-      vim.wo.foldmethod = "expr"
-      vim.wo.foldexpr = "nvim_treesitter#foldexpr()"
-      -- 默认不要折叠
-      -- https://stackoverflow.com/questions/8316139/how-to-set-the-default-to-unfolded-when-you-open-a-file
-      vim.wo.foldlevel = 99
+
+      -- 安装 ensure_installed 列表中的 parser，失败不中断
+      pcall(function()
+        treesitter.install(ensure_installed)
+      end)
+
+      -- filetype → treesitter language 映射
+      local ft_to_lang = {
+        lua = "lua",
+        python = "python",
+        typescript = "typescript",
+        javascript = "javascript",
+        html = "html",
+        css = "css",
+        java = "java",
+        solidity = "solidity",
+        rust = "rust",
+        markdown = "markdown",
+        markdown_inline = "markdown_inline",
+        elixir = "elixir",
+        erlang = "erlang",
+        scala = "scala",
+        gitconfig = "git_config",
+        gitrebase = "git_rebase",
+        go = "go",
+        gpg = "gpg",
+        groovy = "groovy",
+        haskell = "haskell",
+        json = "json",
+        jq = "jq",
+        kotlin = "kotlin",
+        nginx = "nginx",
+        ruby = "ruby",
+        toml = "toml",
+        vim = "vim",
+        help = "vimdoc",
+        vimdoc = "vimdoc",
+        xml = "xml",
+        yaml = "yaml",
+        sh = "bash",
+        bash = "bash",
+        zsh = "bash",
+      }
+
+      local group = vim.api.nvim_create_augroup("UserTreesitter", { clear = true })
+
+      vim.api.nvim_create_autocmd("FileType", {
+        group = group,
+        callback = function(args)
+          local ft = vim.bo[args.buf].filetype
+          local lang = ft_to_lang[ft]
+          if not lang then
+            return
+          end
+
+          -- 启动 treesitter 高亮，失败静默（尤其保护 markdown/markview）
+          pcall(vim.treesitter.start, args.buf, lang)
+
+          -- Neovim 0.12 原生 foldexpr
+          vim.wo[args.buf].foldmethod = "expr"
+          vim.wo[args.buf].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+          vim.wo[args.buf].foldlevel = 99
+
+          -- treesitter indent（markdown 除外，避免和 markview 组合出错）
+          if ft ~= "markdown" and ft ~= "markdown_inline" then
+            pcall(function()
+              vim.bo[args.buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+            end)
+          end
+        end,
+      })
     end,
   },
 }
