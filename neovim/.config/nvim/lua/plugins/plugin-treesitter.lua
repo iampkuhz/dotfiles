@@ -156,9 +156,18 @@ return {
           pcall(vim.treesitter.start, args.buf, lang)
 
           -- Neovim 0.12 原生 foldexpr
-          vim.wo[args.buf].foldmethod = "expr"
-          vim.wo[args.buf].foldexpr = "v:lua.vim.treesitter.foldexpr()"
-          vim.wo[args.buf].foldlevel = 99
+          -- foldmethod/foldexpr/foldlevel 是 window-local option，不能用 args.buf 当 window id。
+          local function apply_fold_options(bufnr)
+            for _, win in ipairs(vim.api.nvim_list_wins()) do
+              if vim.api.nvim_win_is_valid(win) and vim.api.nvim_win_get_buf(win) == bufnr then
+                vim.wo[win].foldmethod = "expr"
+                vim.wo[win].foldexpr = "v:lua.vim.treesitter.foldexpr()"
+                vim.wo[win].foldlevel = 99
+              end
+            end
+          end
+
+          apply_fold_options(args.buf)
 
           -- treesitter indent（markdown 除外，避免和 markview 组合出错）
           if ft ~= "markdown" and ft ~= "markdown_inline" then
