@@ -22,3 +22,8 @@ path_prepend "$HOME/.utoo-proxy"
 if [[ -d "/opt/homebrew/opt/postgresql@18/bin" ]]; then
   path=("/opt/homebrew/opt/postgresql@18/bin" $path)
 fi
+
+# libpq（包含 psql 等命令，不需要安装完整的 postgresql）
+if [[ -d "/opt/homebrew/opt/libpq/bin" ]]; then
+  path=("/opt/homebrew/opt/libpq/bin" $path)
+fi

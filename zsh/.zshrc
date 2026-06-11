@@ -1,10 +1,3 @@
-# OPENSPEC:START
-# OpenSpec-cn shell 补全配置
-fpath=("/Users/zhehan/.oh-my-zsh/custom/completions" $fpath)
-autoload -Uz compinit
-compinit
-# OPENSPEC:END
-
 # =========================
 # 1) 加载全局私有环境变量文件：~/.env（不进 git）
 # =========================
@@ -43,9 +36,3 @@ if [[ -d "$ZSH_CONFIG_DIR" ]]; then
 
   unset _zsh_file_start _zsh_file_end _zsh_file_cost_ms _zsh_end_ts
 fi
-
-# OpenClaw Completion
-source "/Users/zhehan/.openclaw/completions/openclaw.zsh"
-
-# 直接使用 libpq，里面包括 psql 等命令，不需要安装完整的 postgresql
-export PATH="$(brew --prefix libpq)/bin:$PATH"
