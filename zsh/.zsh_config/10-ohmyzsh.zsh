@@ -68,7 +68,8 @@ plugins=(
   # zsh-autocomplete 必须放在最前面：
   # 它内部会调用 compinit 并接管补全系统，需要先于其他插件加载。
   # 注意：.zshrc 中不能手动调用 compinit，否则会导致 .autocomplete:async:* bad file descriptor。
-  zsh-autocomplete
+  #  有 bug，运行冲突
+  # zsh-autocomplete
 
   # 以下插件由 oh-my-zsh 内置，主要用于补全与常用别名。
   # 这类命令可以直接通过 plugins 参数启用，不需要额外安装第三方插件仓库。
