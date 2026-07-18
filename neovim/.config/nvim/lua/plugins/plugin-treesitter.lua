@@ -52,6 +52,7 @@ return {
     "nvim-treesitter/nvim-treesitter",
     branch = "main",
     lazy = false,
+    enabled = not vim.g.vscode, -- VS Code 已负责语法高亮，避免 vscode-neovim 启动 Treesitter 装饰器
     build = ":TSUpdate",
     config = function()
       local ensure_installed = {
