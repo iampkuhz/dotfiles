@@ -1,41 +1,100 @@
 #!/usr/bin/env bash
-set -euo pipefaik
+# 使用 dotfiles 的 Brewfile 安装、检查或升级 Homebrew 环境。
 
-# ===========================================================================
-# Homebrew 工具安装脚本
-# ===========================================================================
+set -euo pipefail
 
-# yarn：包管理器，使用 nvm 管理的 node（不安装 homebrew node）
-brew install yarn yamlfmt pdf2svg
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+SHARED_BREWFILE="$REPO_ROOT/Brewfile"
+LOCAL_BREWFILE="$REPO_ROOT/Brewfile.local"
+MODE="${1:-install}"
 
-# 代码 formatter 工具（neovim 的 conform.nvim 等插件会调用）
-# 【注意】prettier/prettierd 不通过 brew 安装，因为它们会引入 homebrew node 依赖，
-# 与 nvm 管理的 node 冲突。改为通过 npm 全局安装，见下方 npm_global_install 函数。
-brew install shfmt stylua
-
-# 其他常用工具
-brew install imagemagick grip wget podman-compose
-
-
-# ===========================================================================
-# npm 全局工具安装（需要先通过 nvm 安装 node）
-# ===========================================================================
-npm_global_install() {
-  # 检查 npm 命令是否可用（需要先安装 nvm 并设置默认版本）
-  if ! command -v npm >/dev/null 2>&1; then
-    echo "⚠️  npm 未找到，请先安装 nvm 并设置默认 node 版本："
-    echo "   1. 运行: bash bootstrap/ohmyzsh.sh（会提示安装 nvm）"
-    echo "   2. 然后: nvm install --lts && nvm alias default <版本>"
-    echo "   3. 最后重新运行本脚本"
-    return 1
-  fi
-  echo "通过 npm 安装全局工具..."
-  # prettier: 代码格式化
-  # @fsouza/prettierd: prettier 的守护进程版本，启动更快
-  npm install -g prettier @fsouza/prettierd
+usage() {
+	cat <<'USAGE'
+用法：
+  bash bootstrap/brew.sh install  # 补装缺失依赖，不主动升级
+  bash bootstrap/brew.sh check    # 检查依赖是否齐全
+  bash bootstrap/brew.sh upgrade  # 显式升级清单内依赖
+USAGE
 }
 
-# 执行 npm 全局安装（如果 npm 可用）
-npm_global_install || true
+if [[ "$MODE" != "install" && "$MODE" != "check" && "$MODE" != "upgrade" ]]; then
+	echo "不支持的模式：$MODE" >&2
+	usage >&2
+	exit 2
+fi
 
-echo "✅ brew.sh 安装完成"
+if [[ "$(uname -s)" != "Darwin" ]]; then
+	echo "该脚本仅支持 macOS。" >&2
+	exit 1
+fi
+
+if [[ ! -f "$SHARED_BREWFILE" ]]; then
+	echo "缺少共享依赖清单：$SHARED_BREWFILE" >&2
+	exit 1
+fi
+
+# 新 Mac 上 Homebrew 可能已安装，但当前 shell 尚未加载它的 PATH。
+if ! command -v brew >/dev/null 2>&1; then
+	if [[ -x /opt/homebrew/bin/brew ]]; then
+		eval "$(/opt/homebrew/bin/brew shellenv)"
+	elif [[ -x /usr/local/bin/brew ]]; then
+		eval "$(/usr/local/bin/brew shellenv)"
+	else
+		echo "未检测到 Homebrew。请先按 https://brew.sh/ 的官方说明安装。" >&2
+		exit 1
+	fi
+fi
+
+# 共享清单和单机清单使用同一模式处理，避免两套安装逻辑逐渐分叉。
+run_bundle() {
+	local brewfile="$1"
+	local label="$2"
+
+	echo "==> $label: $brewfile"
+	case "$MODE" in
+	install)
+		brew bundle install --no-upgrade --file "$brewfile"
+		;;
+	check)
+		brew bundle check --no-upgrade --verbose --file "$brewfile"
+		;;
+	upgrade)
+		brew bundle upgrade --file "$brewfile"
+		;;
+	esac
+}
+
+run_bundle "$SHARED_BREWFILE" "处理跨机器共享依赖"
+
+if [[ -f "$LOCAL_BREWFILE" ]]; then
+	run_bundle "$LOCAL_BREWFILE" "处理当前机器依赖"
+else
+	echo "==> 未发现 Brewfile.local，跳过当前机器依赖"
+fi
+
+if [[ "$MODE" != "check" ]]; then
+	echo "==> 验证 Homebrew 依赖"
+	brew bundle check --no-upgrade --verbose --file "$SHARED_BREWFILE"
+	if [[ -f "$LOCAL_BREWFILE" ]]; then
+		brew bundle check --no-upgrade --verbose --file "$LOCAL_BREWFILE"
+	fi
+fi
+
+# prettier 系列沿用 npm 安装，避免把 npm 工具版本写进 Homebrew 清单。
+npm_global_install() {
+	if ! command -v npm >/dev/null 2>&1; then
+		echo "⚠️  npm 未找到，跳过 prettier 与 prettierd。"
+		echo "   请先运行 bootstrap/ohmyzsh.sh，并通过 nvm 安装默认 Node.js。"
+		return 0
+	fi
+
+	echo "==> 通过 npm 安装全局格式化工具"
+	npm install -g prettier @fsouza/prettierd
+}
+
+if [[ "$MODE" != "check" ]]; then
+	npm_global_install
+fi
+
+echo "✅ Homebrew 依赖处理完成"
