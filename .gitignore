@@ -1,25 +1,30 @@
-# macOS 系统文件
+# macOS 与编辑器本机状态
 .DS_Store
-
-# 视频总结过程中产生的字幕与转写文件（避免误提交）
-*.vtt
-*.srt
-*.json
-
-# 视频/音频下载产物（仅做中间处理）
-*.mp3
-*.m4a
-*.wav
-*.flac
-*.mp4
-*.mkv
-
-# 临时目录
-/tmp/
 /.idea/
+/.claude/settings.local.json
 
-# 仅当前机器使用的 Homebrew 清单；跨机器共享项放在根目录 Brewfile
+# 临时处理产物统一放入 tmp；不按 JSON/音视频后缀全仓忽略真实配置。
+/tmp/
+
+# 单机依赖清单与 Bundle 自动生成的机器状态；共享声明仍保留在 Brewfile。
 /Brewfile.local
+/Brewfile.lock.json
 
-# Qwen 本地密钥文件（不入库）
-/qwen/.qwen/.env
+# 本地密钥与认证状态；仅允许无密钥的示例文件进入仓库。
+.env
+.env.*
+!.env.demo
+!.env.example
+*.pem
+*.key
+*.p12
+/qwen/.qwen/oauth_creds.json
+/qwen/.qwen/credentials.json
+
+# 依赖、缓存与日志可重建，不属于配置源；lazy-lock.json 必须可追踪。
+node_modules/
+__pycache__/
+.venv/
+*.pyc
+*.log
+/neovim/.config/nvim/.cache/
