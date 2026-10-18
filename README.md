@@ -119,10 +119,10 @@ macOS 上安装 ShellCheck 使用 `brew install shellcheck`（已列入共享 Br
 
 ```bash
 # 每个脚本分别做语法检查，bash -n 后面多个文件不会全部被检查
-for script_file in bootstrap/*.sh services/podman/*.sh; do bash -n "$script_file" || break; done
-shfmt -i 2 -d bootstrap/*.sh services/podman/*.sh
+for script_file in bootstrap/*.sh; do bash -n "$script_file" || break; done
+shfmt -i 2 -d bootstrap/*.sh
 # 已安装 ShellCheck 时运行；不要为验证改动而隐式安装工具
-shellcheck bootstrap/*.sh services/podman/*.sh
+shellcheck bootstrap/*.sh
 bash bootstrap/test-links.sh
 bash bootstrap/test-node.sh
 
@@ -143,8 +143,7 @@ Podman 镜像、容器和虚拟机通过声明重建，不导出几 GB 的运行
 
 ## 高优先级配置恢复
 
-本轮只管理 HHKB/Karabiner、iTerm2 和 Podman 启动配置。其他桌面应用不加入恢复流程。
-`desktop/` 保存 JSON 数据；`services/podman/` 保存启动脚本和 LaunchAgent 模板。
+桌面配置只管理 HHKB/Karabiner 和 iTerm2，配置保存在 `desktop/`。其他桌面应用不加入恢复流程。
 不复制字体文件、应用源码、镜像、虚拟机、缓存、会话历史或数据库。
 
 ### HHKB 与 iTerm2
@@ -167,45 +166,8 @@ bash bootstrap/desktop.sh install  # 仅复制小配置；相同内容跳过，�
   按需设为默认。原有默认 Profile 和应用偏好数据库不会被替换。
 - 两份副本可以由应用正常修改；调整后需审查并手工同步回仓库。恢复脚本不启动或重启应用。
 
-### Podman 启动器与 LaunchAgent
+### 服务配置归属
 
-`services/podman/start.sh` 保留本机的四个服务顺序：LiteLLM PostgreSQL、LiteLLM、SearxNG、Crawl4AI。
-它只启动已有 machine 和停止的容器；缺失容器会明确报错，不克隆源码、不拉镜像、不隐式创建数据目录。
-machine 默认为 `podman-machine-default`，需要其他名称时可设置 `PODMAN_MACHINE`。
-该脚本和 LaunchAgent 都不会被 `bootstrap/run.sh` 自动调用。
-
-新机先按服务所属项目的 Compose 说明准备配置、密钥与数据，并重建容器，再手工验证启动器。
-只有明确需要登录后自启时，才渲染和安装 LaunchAgent：
-
-```bash
-# 先只生成临时文件并校验；-B 禁止 Python 在用户目录生成字节码缓存
-python3 -B services/podman/render-agent.py > "$TMPDIR/dotfiles-podman-agent.plist"
-plutil -lint "$TMPDIR/dotfiles-podman-agent.plist"
-# 以下是新机的主动启用步骤；已有同名文件或服务时先人工核对，不重复创建
-mkdir -p "$HOME/Library/LaunchAgents" "$HOME/Library/Logs"
-cp -n "$TMPDIR/dotfiles-podman-agent.plist" "$HOME/Library/LaunchAgents/com.feipi.podman-services.plist"
-# 只有目标与新模板完全相同时才加载；已有不同配置不会被误用
-if cmp -s "$TMPDIR/dotfiles-podman-agent.plist" "$HOME/Library/LaunchAgents/com.feipi.podman-services.plist"; then
-  # 加载后会按 RunAtLoad 启动服务；这是主动启用步骤
-  launchctl bootstrap "gui/$(id -u)" "$HOME/Library/LaunchAgents/com.feipi.podman-services.plist"
-fi
-```
-
-模板复用现有 `com.feipi.podman-services` Label，路径由渲染器从仓库位置和 HOME 推导，
-不记录本机用户名。输出与错误分别保存在 `~/Library/Logs/`，失败不会无限重启。
-不要在旧机直接替换或重复加载已有 LaunchAgent。
-
-### Compose 和代码仓库的关系
-
-`image:` 使用预构建镜像，通常只需 Compose、少量挂载配置和本机密钥；无需克隆上游应用源码。
-`build:` 才需要 Dockerfile 和构建上下文；上下文可以来自独立代码仓库或 Git URL，
-此时保存仓库地址、固定版本和准备命令，不把整个上游仓库复制进 Dotfiles。
-参见 [Compose 服务定义](https://docs.docker.com/reference/compose-file/services/) 和
-[构建上下文](https://docs.docker.com/reference/compose-file/build/)。
-
-当前四个容器对应的三份 Compose 都只声明镜像，没有 `build:`，文件合计约 7 KB。
-Compose 与挂载配置目前归 `feipi-agent-kit/tools/` 中的 `gateway/litellm`、`search/searxng`、
-`crawl/crawl4ai` 管理，本仓库只保存机器启动入口，不复制它们或上游源码。
-新 Mac 需要取回这些项目配置；PostgreSQL 数据和认证材料需要另行恢复，启动脚本不能代替数据备份。
-
-插件锁文件与分支对齐、其他运行时整理不纳入本轮，避免在配置迁移时隐式升级工具。
+LiteLLM/PostgreSQL、SearxNG、Crawl4AI 的 Compose、挂载配置、启动脚本和 LaunchAgent
+统一由 `feipi-agent-kit` 管理。本仓库不复制或维护这些服务，只保留机器环境所需的
+Podman/Compose 工具依赖。
