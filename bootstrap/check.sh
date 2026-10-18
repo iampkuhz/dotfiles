@@ -5,12 +5,12 @@ set -euo pipefail
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 result=0
 # Bash 的 -n 每次只检查一个脚本，因此不能简单传入 bootstrap/*.sh。
-for script_file in "$REPO_ROOT"/bootstrap/*.sh; do
+for script_file in "$REPO_ROOT"/bootstrap/*.sh "$REPO_ROOT"/services/podman/*.sh; do
   bash -n "$script_file" || result=1
 done
 # ShellCheck 只读取脚本，发现问题时累积失败状态，不在检查入口安装工具。
 if command -v shellcheck >/dev/null 2>&1; then
-  shellcheck "$REPO_ROOT"/bootstrap/*.sh || result=1
+  shellcheck "$REPO_ROOT"/bootstrap/*.sh "$REPO_ROOT"/services/podman/*.sh || result=1
 fi
 for required_command in git brew stow nvim tree-sitter shellcheck shfmt python3 uv node npm prettier prettierd yarn rustup rustfmt; do
   if command -v "$required_command" >/dev/null 2>&1; then
