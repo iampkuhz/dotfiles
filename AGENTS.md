@@ -15,7 +15,7 @@
 - `bash bootstrap/brew.sh check|install|upgrade`：只管理根目录共享/单机 Homebrew 清单；安装默认不升级、不 cleanup。
 - `bash bootstrap/node.sh install|upgrade`：先准备 Node，再补装 npm 工具；upgrade 只升级 npm 工具。
 - `bash bootstrap/rust.sh install|upgrade`、`bash bootstrap/ohmyzsh.sh install|upgrade`：补装和升级分离，不向 shell 启动文件追加内容。
-- `bash bootstrap/check.sh`：只读检查语法、关键命令和配置来源，不联网、不加载用户启动文件、不启动服务。
+- `bash bootstrap/check.sh`：只读检查 Bash 语法、可用时的 ShellCheck、关键命令和配置来源，不联网、不加载用户启动文件、不启动服务。
 
 ## 编码风格与命名规范
 - Bash 脚本优先使用 `set -euo pipefail`；缩进 2 空格；函数用 `snake_case` 命名。

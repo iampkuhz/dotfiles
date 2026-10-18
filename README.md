@@ -103,6 +103,7 @@ bash bootstrap/brew.sh check
 ```
 
 `check.sh` 检查 Bash 语法、关键命令路径、配置实际来源与 oh-my-zsh 是否存在；
+已安装 ShellCheck 时还会检查全部初始化脚本，缺少工具时报告缺项。
 它不加载 `.zshrc`、不访问网络、不启动服务。Homebrew 检查单独运行。
 检查通过只说明基础安装和链接具备条件，不代表已验证 GUI、业务项目或远端服务。
 
@@ -112,6 +113,9 @@ bash bootstrap/brew.sh check
 并实际打开 Markdown 验证预览；初始化脚本本身不启动 Neovim。
 
 ## 本地验证与迁移边界
+
+macOS 上安装 ShellCheck 使用 `brew install shellcheck`（已列入共享 Brewfile），
+之后执行 `shellcheck bootstrap/*.sh`；ShellCheck 不支持直接检查 Zsh 配置，后者使用 `zsh -n`。
 
 ```bash
 # 每个脚本分别做语法检查，bash -n 后面多个文件不会全部被检查
@@ -136,3 +140,17 @@ Podman 镜像、容器和虚拟机通过声明重建，不导出几 GB 的运行
 有状态业务数据按业务项目的备份方案独立处理。本仓库不管理业务仓库或 NAS，
 `bootstrap/podman.sh` 是可选的 PlantUML 启动命令，不由初始化入口调用。
 密钥、`.env`、认证状态、模型和生成物不入 Git，示例环境文件只能放无密钥占位值。
+
+## 补充迁移清单
+
+除共享 Brewfile 外，个人环境优先保存以下声明和少量配置，不把整台机器的安装状态搬进来：
+
+- `Brewfile.local.example` 提供可选的 CLI、PDF/OCR、终端、键盘、窗口和字体条目；实际选择写入本机清单。
+- Karabiner/HHKB 保存有效键位规则；iTerm2、Zed 保存脱敏设置或导出步骤，排除数据库、缓存与自动备份。
+- `.zprofile`/`.zshenv` 若要纳入，先整理成可移植的 PATH 初始化，去掉用户名绝对路径和重复初始化；不原样复制旧文件。
+- Git 保存通用选项及必要的全局 ignore；姓名、邮箱、SSH 主机信息和凭据分开管理，避免宽泛模式隐藏项目真实文件。
+- Podman 保存参数化启动脚本与 LaunchAgent 模板；Compose 放在服务所属项目，认证、machine 连接状态和虚拟机不入库。
+- Node/Python/Rust 及 Java 明确版本管理入口。各项目保存版本声明，npm/uv 的个人 CLI 按需记录安装方式，不复制多个旧版本或全局依赖目录。
+
+迁移时还应核对插件锁文件与配置声明的分支一致。若涉及插件版本升级，应单独审查，
+不在基础环境初始化或 ShellCheck 验证时隐式执行。
