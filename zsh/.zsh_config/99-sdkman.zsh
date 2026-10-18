@@ -18,8 +18,9 @@ elif [[ -s "$HOME/.sdkman/bin/sdkman-init.sh" ]]; then
   # 官方 curl 安装器默认安装位置。
   export SDKMAN_DIR="$HOME/.sdkman"
 else
-  # 没找到 init 脚本时保留默认值，后面的懒加载函数会输出明确诊断。
-  export SDKMAN_DIR="${SDKMAN_DIR:-$HOME/.sdkman}"
+  # 新机未安装 SDKMAN 时不定义 java 等占位函数，保留系统或独立 JDK 的命令。
+  # 本文件由 .zshrc source；return 只结束当前模块，不退出交互 shell。
+  return 0
 fi
 
 # 启动加速：改为懒加载，只有首次调用 sdk/java/javac/mvn/gradle 时才 source sdkman-init.sh。

@@ -4,24 +4,36 @@
 
 # 每个 wrapper 自包含 lazy-load 逻辑，不依赖任何外部函数。
 # 这样在 Claude Code shell snapshot 恢复时也不会因缺失 helper 函数而报错。
+# 必须先删除占位函数再加载 nvm.sh，不能删除加载后生成的真实 nvm 函数。
 nvm() {
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   unset -f nvm node npm npx
+  if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+    print -u2 "nvm 尚未安装；请运行 bash bootstrap/node.sh install。"
+    return 127
+  fi
+  source "$NVM_DIR/nvm.sh" || return
   nvm "$@"
 }
 node() {
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   unset -f nvm node npm npx
+  # 无 nvm 时沿用系统 Node；有 nvm 时加载其默认版本。
+  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    source "$NVM_DIR/nvm.sh" || return
+  fi
   node "$@"
 }
 npm() {
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   unset -f nvm node npm npx
+  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    source "$NVM_DIR/nvm.sh" || return
+  fi
   npm "$@"
 }
 npx() {
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
   unset -f nvm node npm npx
+  if [[ -s "$NVM_DIR/nvm.sh" ]]; then
+    source "$NVM_DIR/nvm.sh" || return
+  fi
   npx "$@"
 }
 

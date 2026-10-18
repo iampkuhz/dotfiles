@@ -8,6 +8,10 @@
 # 基础开发环境
 brew "git"
 brew "gh"
+# 链接入口依赖 Stow；终端编辑器配置依赖 Neovim。
+brew "stow"
+brew "neovim"
+# Python 为脚本提供基础解释器；项目环境由 uv 管理，不全局恢复旧机 pip 包。
 brew "python"
 brew "uv"
 
@@ -18,7 +22,7 @@ brew "yamlfmt"
 brew "stylua"
 
 # 编辑、文档与日常命令行工具
-brew "yarn"
+# Node 不在 Homebrew 重复安装；bootstrap/node.sh 先准备 Node，再补装 Yarn/Prettier。
 brew "pdf2svg"
 brew "imagemagick"
 brew "grip"
@@ -31,5 +35,6 @@ brew "yt-dlp"
 brew "whisper-cpp"
 
 # 本地服务运行时
+brew "podman"
 brew "podman-compose"
-cask "docker"
+# GUI 软件和 Java/多版本管理器按需写入 Brewfile.local，默认不安装 Docker Desktop。

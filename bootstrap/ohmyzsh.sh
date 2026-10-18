@@ -1,22 +1,39 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# 这个脚本负责安装/更新 oh-my-zsh 及当前仓库 zsh 配置依赖的外部主题/插件。
-# 设计为可重复执行：已存在时走更新，不存在时才克隆。
+# 这个脚本补装 oh-my-zsh 及当前仓库 zsh 配置依赖的外部主题/插件。
+# 默认保留已有仓库，只有显式 upgrade 才更新。
 # 同时预生成部分补全缓存，避免 zsh 启动时执行耗时的补全生成命令。
 
 ZSH_DIR="${ZSH:-$HOME/.oh-my-zsh}"
 ZSH_CUSTOM_DIR="${ZSH_CUSTOM:-$ZSH_DIR/custom}"
 ZSH_CACHE_DIR="${ZSH_CACHE_DIR:-$ZSH_DIR/cache}"
+MODE="${1:-install}"
+if [[ "$MODE" != install && "$MODE" != upgrade ]]; then
+  echo "用法：bash bootstrap/ohmyzsh.sh [install|upgrade]" >&2
+  exit 2
+fi
 
-# 统一处理「目录不存在则 clone，目录存在则 pull」的逻辑，避免重复代码。
+# 目标存在但不是 Git 仓库时拒绝接管，避免覆盖用户手工安装的内容。
 install_or_update_repo() {
   local repo_url="$1"
   local target_dir="$2"
 
   if [[ -d "$target_dir/.git" ]]; then
-    echo "更新: $target_dir"
-    git -C "$target_dir" pull --ff-only
+    if [[ "$MODE" == upgrade ]]; then
+      # 有本地修改时交给用户处理，不自动 stash、reset 或合并。
+      if [[ -n "$(git -C "$target_dir" status --porcelain)" ]]; then
+        echo "仓库存在本地修改，停止升级：$target_dir" >&2
+        exit 1
+      fi
+      echo "更新: $target_dir"
+      git -C "$target_dir" pull --ff-only
+    else
+      echo "保留已有仓库: $target_dir"
+    fi
+  elif [[ -e "$target_dir" || -L "$target_dir" ]]; then
+    echo "目录冲突，请人工检查：$target_dir" >&2
+    exit 1
   else
     echo "安装: $target_dir"
     # 使用浅克隆减少首次安装时间和流量。
@@ -28,6 +45,9 @@ if ! command -v git >/dev/null 2>&1; then
   echo "错误: 未检测到 git，请先安装 git 后再执行。"
   exit 1
 fi
+
+# 不继承业务目录的 rust-toolchain 覆盖设置，补全生成不应触发业务工具链下载。
+cd "$HOME"
 
 # 先准备 oh-my-zsh 主体目录；后续主题与插件都依赖该目录结构。
 install_or_update_repo "https://github.com/ohmyzsh/ohmyzsh.git" "$ZSH_DIR"
@@ -42,9 +62,17 @@ mkdir -p "$ZSH_CACHE_DIR/completions"
 install_or_update_repo \
   "https://github.com/spaceship-prompt/spaceship-prompt.git" \
   "$ZSH_CUSTOM_DIR/themes/spaceship-prompt"
-ln -sfn \
-  "$ZSH_CUSTOM_DIR/themes/spaceship-prompt/spaceship.zsh-theme" \
-  "$ZSH_CUSTOM_DIR/themes/spaceship.zsh-theme"
+# 正确链接可重复使用；错误链接或真实文件均不覆盖。
+theme_source="$ZSH_CUSTOM_DIR/themes/spaceship-prompt/spaceship.zsh-theme"
+theme_target="$ZSH_CUSTOM_DIR/themes/spaceship.zsh-theme"
+if [[ -L "$theme_target" && "$theme_target" -ef "$theme_source" ]]; then
+  echo "保留已有主题链接。"
+elif [[ -e "$theme_target" || -L "$theme_target" ]]; then
+  echo "主题链接冲突，请人工检查：$theme_target" >&2
+  exit 1
+else
+  ln -s "$theme_source" "$theme_target"
+fi
 
 # 安装 zsh 配置中声明的外部插件（内置插件 git/kubectl 不需要单独安装）。
 install_or_update_repo \
@@ -53,9 +81,7 @@ install_or_update_repo \
 install_or_update_repo \
   "https://github.com/zdharma-continuum/fast-syntax-highlighting.git" \
   "$ZSH_CUSTOM_DIR/plugins/fast-syntax-highlighting"
-install_or_update_repo \
-  "https://github.com/marlonrichert/zsh-autocomplete.git" \
-  "$ZSH_CUSTOM_DIR/plugins/zsh-autocomplete"
+# zsh-autocomplete 已在配置中禁用，不把未启用插件列为新机必装项。
 install_or_update_repo \
   "https://github.com/Katrovsky/zsh-ollama-completion.git" \
   "$ZSH_CUSTOM_DIR/plugins/ollama"
@@ -69,23 +95,24 @@ echo "预生成补全缓存..."
 # helm 补全（如果 helm 命令存在）
 if command -v helm >/dev/null 2>&1; then
   echo "  生成 helm 补全..."
-  helm completion zsh > "$ZSH_CACHE_DIR/completions/_helm" 2>/dev/null || true
+  helm completion zsh >"$ZSH_CACHE_DIR/completions/_helm" 2>/dev/null || true
 fi
 
 # rustup/cargo 补全（如果 rustup 命令存在）
 if command -v rustup >/dev/null 2>&1; then
   echo "  生成 rustup 补全..."
-  rustup completions zsh > "$ZSH_CACHE_DIR/completions/_rustup" 2>/dev/null || true
+  rustup completions zsh >"$ZSH_CACHE_DIR/completions/_rustup" 2>/dev/null || true
   # cargo 补全需要从 rustup 管理的 sysroot 中获取
   if command -v cargo >/dev/null 2>&1; then
     echo "  生成 cargo 补全..."
     # 获取 cargo 补全文件路径
-    _cargo_comp_src="$(rustup which cargo 2>/dev/null | xargs dirname 2>/dev/null)/../share/zsh/site-functions/_cargo" || true
+    _cargo_binary="$(rustup which cargo 2>/dev/null)" || _cargo_binary=""
+    _cargo_comp_src="${_cargo_binary%/*}/../share/zsh/site-functions/_cargo"
     if [[ -f "$_cargo_comp_src" ]]; then
       cp "$_cargo_comp_src" "$ZSH_CACHE_DIR/completions/_cargo"
     else
       # 如果找不到，生成一个代理补全文件
-      cat > "$ZSH_CACHE_DIR/completions/_cargo" <<'CARGO_EOF'
+      cat >"$ZSH_CACHE_DIR/completions/_cargo" <<'CARGO_EOF'
 #compdef cargo
 # 代理补全：运行时从 rustup sysroot 加载实际补全
 _cargo_sysroot="$(rustup run stable rustc --print sysroot 2>/dev/null)"
@@ -99,7 +126,7 @@ fi
 # docker 补全（如果 docker 命令存在）
 if command -v docker >/dev/null 2>&1; then
   echo "  生成 docker 补全..."
-  docker completion zsh > "$ZSH_CACHE_DIR/completions/_docker" 2>/dev/null || true
+  docker completion zsh >"$ZSH_CACHE_DIR/completions/_docker" 2>/dev/null || true
 fi
 
 # ===========================================================================
@@ -125,7 +152,7 @@ EOF
 # 预生成 codex 补全缓存（如果命令存在）
 if command -v codex >/dev/null 2>&1; then
   echo "  生成 codex 补全..."
-  codex completion zsh > "$ZSH_CACHE_DIR/completions/_codex" 2>/dev/null || true
+  codex completion zsh >"$ZSH_CACHE_DIR/completions/_codex" 2>/dev/null || true
 fi
 
 # OpenClaw 也采用同样方式：把补全注册放到 custom plugin 中，统一由 oh-my-zsh 管理加载时机。
@@ -151,8 +178,8 @@ EOF
 # 预生成 openclaw 补全缓存（如果命令存在）
 if command -v openclaw >/dev/null 2>&1; then
   echo "  生成 openclaw 补全..."
-  openclaw completion --shell zsh > "$ZSH_CACHE_DIR/completions/_openclaw" 2>/dev/null || true
+  openclaw completion --shell zsh >"$ZSH_CACHE_DIR/completions/_openclaw" 2>/dev/null || true
 fi
 
-echo "✅ oh-my-zsh 与相关插件安装/更新完成"
+echo "✅ oh-my-zsh 与相关插件处理完成（${MODE}）"
 echo "   补全缓存目录: $ZSH_CACHE_DIR/completions"
