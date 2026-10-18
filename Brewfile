@@ -11,6 +11,8 @@ brew "gh"
 # 链接入口依赖 Stow；终端编辑器配置依赖 Neovim。
 brew "stow"
 brew "neovim"
+# nvim-treesitter main 分支编译 parser 需要 tree-sitter CLI，不能仅依赖运行库。
+brew "tree-sitter-cli"
 # Python 为脚本提供基础解释器；项目环境由 uv 管理，不全局恢复旧机 pip 包。
 brew "python"
 brew "uv"
