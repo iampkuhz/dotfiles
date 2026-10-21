@@ -3,6 +3,9 @@
 本仓库保存 Mac 研发环境的配置与可重复执行的安装入口。共享依赖写在根目录
 `Brewfile`，单机选择写在忽略的 `Brewfile.local`；不从旧机软件快照生成必装清单。
 
+换机时按 [迁移手册与准备状态](MIGRATION.md) 操作：区分脚本恢复、仓库重建、
+私密文件恢复和个人数据复制，并在旧机退役前完成验收。
+
 ## 新 Mac 初始化
 
 1. 执行 `xcode-select --install`，在系统对话框完成 Command Line Tools 安装。
